@@ -1,0 +1,241 @@
+/* ==========================================================================
+   OptiCare Pro — สไตล์เสริมที่วางทับบน Tailwind CSS
+   ไฟล์นี้เก็บเฉพาะกฎที่ Tailwind utility ทำแทนไม่ได้ หรือกฎที่ต้องบังคับลำดับ
+   ========================================================================== */
+
+:root {
+  --oc-font-sans: 'Prompt', 'Noto Sans Thai', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --oc-focus: #2563eb;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  font-family: var(--oc-font-sans);
+}
+
+/* Tailwind Play CDN ฉีดสไตล์ตอนรันไทม์ กฎนี้กันไม่ให้ element ที่ต้องซ่อน
+   กะพริบให้เห็นในช่วงสั้น ๆ ก่อนสไตล์ของ Tailwind จะมาถึง
+
+   ห้ามใส่ !important ตรงนี้เด็ดขาด — จะทับ responsive variant อย่าง
+   md:flex / sm:block / lg:inline ทำให้เมนูฝั่งเดสก์ท็อป ชื่อผู้ใช้ และป้าย
+   กำกับปุ่มไม่แสดงถาวร ส่วนกรณี hidden คู่กับ flex/grid บน element เดียวกัน
+   (modal, toast, ปุ่มที่สลับด้วย JS) Tailwind เรียง .hidden ไว้หลัง .flex
+   ในสไตล์ชีตของตัวเองอยู่แล้ว จึงชนะโดยไม่ต้องบังคับ */
+.hidden {
+  display: none;
+}
+
+/* แอตทริบิวต์ hidden ของ HTML ต้องชนะเสมอ และไม่มี responsive variant ใดอ้างถึงมัน */
+[hidden] {
+  display: none !important;
+}
+
+/* ---------- Accessibility ---------- */
+
+:focus-visible {
+  outline: 2px solid var(--oc-focus);
+  outline-offset: 2px;
+  border-radius: 0.375rem;
+}
+
+.skip-link {
+  position: absolute;
+  left: 0.75rem;
+  top: -3rem;
+  z-index: 400;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  background: #1e3a8a;
+  color: #fff;
+  font-size: 0.875rem;
+  font-weight: 600;
+  transition: top 0.2s ease;
+}
+
+.skip-link:focus {
+  top: 0.75rem;
+}
+
+.sr-only-focusable:not(:focus):not(:focus-within) {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* ล็อกการเลื่อนหน้าจอด้านหลังขณะเปิด modal */
+body.is-modal-open {
+  overflow: hidden;
+}
+
+/* ---------- โครงหน้าต่าง modal ----------
+   ฟอร์มลงทะเบียนลูกค้าและใบสั่งยาวเกินความสูงจอ ถ้าปล่อยให้หน้าต่างสูงตามเนื้อหา
+   แล้วจัดกึ่งกลางด้วย flex ส่วนหัวจะถูกดันขึ้นไปนอกพื้นที่ที่เลื่อนถึง — เลื่อนกลับไปดูไม่ได้
+
+   จึงล็อกความสูงหน้าต่างไว้ที่ขนาดจอ แล้วให้ "เฉพาะเนื้อหาตรงกลาง" เลื่อน
+   หัวข้อกับปุ่มบันทึกอยู่กับที่เสมอ ไม่ต้องเลื่อนหาปุ่ม */
+
+.modal-panel {
+  display: flex;
+  flex-direction: column;
+  /* dvh ตัดปัญหาแถบที่อยู่ของเบราว์เซอร์มือถือที่ยุบ/ขยายเวลาเลื่อน */
+  max-height: calc(100vh - 1rem);
+  max-height: calc(100dvh - 1rem);
+}
+
+@media (min-width: 640px) {
+  .modal-panel {
+    max-height: calc(100vh - 2rem);
+    max-height: calc(100dvh - 2rem);
+  }
+}
+
+.modal-form {
+  display: flex;
+  flex-direction: column;
+  /* min-height:0 จำเป็นกับ flex item ที่มีลูกเลื่อนได้ ไม่งั้นจะไม่ยอมหด */
+  min-height: 0;
+  flex: 1 1 auto;
+}
+
+.modal-head {
+  flex: 0 0 auto;
+  padding: 1.25rem 1.5rem 0.875rem;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.modal-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  padding: 1.25rem 1.5rem;
+}
+
+.modal-foot {
+  flex: 0 0 auto;
+  padding: 0.875rem 1.5rem 1.25rem;
+  border-top: 1px solid #f1f5f9;
+  background: #fff;
+  border-bottom-left-radius: 1rem;
+  border-bottom-right-radius: 1rem;
+}
+
+@media (max-width: 640px) {
+  .modal-head { padding: 1rem 1rem 0.75rem; }
+  .modal-body { padding: 1rem; }
+  .modal-foot { padding: 0.75rem 1rem 1rem; }
+}
+
+/* ---------- Components ---------- */
+
+.field-invalid {
+  border-color: #f43f5e !important;
+}
+
+.toast-enter {
+  opacity: 0;
+  transform: translateY(0.75rem);
+}
+
+.toast-show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ตารางในโหมดมือถือให้เลื่อนแนวนอนได้โดยไม่ดันหน้าเว็บ */
+.table-scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* ---------- Preferences ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ---------- Print ---------- */
+
+/* หัวกระดาษแสดงเฉพาะตอนสั่งพิมพ์ */
+#print-letterhead {
+  display: none;
+}
+
+@media print {
+  #login-screen,
+  #app-nav,
+  #mobile-nav,
+  #custom-toast,
+  .no-print {
+    display: none !important;
+  }
+
+  body {
+    background: #fff;
+  }
+
+  main {
+    padding: 0 !important;
+    max-width: none !important;
+  }
+
+  #print-letterhead {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0 0 0.75rem;
+    margin-bottom: 1rem;
+    border-bottom: 2px solid #1e3a8a;
+  }
+
+  #print-letterhead img {
+    width: 56px;
+    height: 56px;
+  }
+
+  #print-letterhead strong {
+    display: block;
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: #1e3a8a;
+  }
+
+  #print-letterhead span {
+    display: block;
+    font-size: 0.75rem;
+    color: #475569;
+  }
+
+  .shadow-sm,
+  .shadow-md,
+  .shadow-lg,
+  .shadow-2xl {
+    box-shadow: none !important;
+  }
+
+  /* บังคับให้เบราว์เซอร์พิมพ์สีพื้นหลังของป้ายสถานะและตาราง */
+  * {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* กันไม่ให้การ์ดข้อมูลถูกตัดกลางหน้ากระดาษ */
+  section > div,
+  table {
+    break-inside: avoid;
+  }
+}

@@ -1,0 +1,2014 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="ดูดีการแว่น — ระบบบริหารจัดการร้านแว่นตา บันทึกค่าสายตา คลังสินค้า ออเดอร์งานแล็บ และผู้ช่วยแนะนำเลนส์">
+  <meta name="color-scheme" content="light">
+  <meta name="theme-color" content="#1e3a8a">
+  <meta name="application-name" content="ดูดีการแว่น">
+  <meta name="apple-mobile-web-app-title" content="ดูดีการแว่น">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="format-detection" content="telephone=no">
+  <title>ดูดีการแว่น — ระบบบริหารจัดการร้านแว่นตา | OptiCare Pro</title>
+
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="ดูดีการแว่น">
+  <meta property="og:title" content="ดูดีการแว่น — ระบบบริหารจัดการร้านแว่นตา">
+  <meta property="og:description" content="บันทึกค่าสายตา คลังสินค้า ออเดอร์งานแล็บ และผู้ช่วยแนะนำเลนส์ในระบบเดียว">
+  <meta property="og:image" content="logo.png">
+
+  <link rel="icon" type="image/png" sizes="256x256" href="logo.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+  <link rel="preload" as="image" href="logo.png">
+
+  <!-- Google Fonts — Prompt -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Font Awesome 6 (free) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+        crossorigin="anonymous" referrerpolicy="no-referrer">
+
+  <!-- Tailwind CSS (Play CDN) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    // ต้องตั้งค่าแบบ inline เพราะ Play CDN อ่าน config จากตัวแปร global ตอนรันไทม์
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Prompt', 'Noto Sans Thai', 'system-ui', '-apple-system', 'Segoe UI', 'sans-serif']
+          },
+          fontSize: {
+            '2xs': ['0.6875rem', { lineHeight: '1rem' }]
+          }
+        }
+      }
+    };
+  </script>
+
+  <link rel="stylesheet" href="styles.css">
+  <script src="script.js" defer></script>
+</head>
+
+<body class="bg-gray-50 text-gray-800 min-h-screen flex flex-col">
+
+  <a class="skip-link" href="#main-content">ข้ามไปยังเนื้อหาหลัก</a>
+
+  <noscript>
+    <div class="bg-rose-600 text-white text-center text-sm p-4">
+      ระบบนี้ต้องเปิดใช้งาน JavaScript กรุณาเปิด JavaScript ในเบราว์เซอร์แล้วโหลดหน้านี้ใหม่อีกครั้ง
+    </div>
+  </noscript>
+
+  <!-- ==================== LOGIN SCREEN ==================== -->
+  <div id="login-screen" role="dialog" aria-modal="true" aria-labelledby="login-title"
+       class="fixed inset-0 z-[300] bg-gradient-to-br from-blue-900 to-sky-900 flex items-center justify-center p-4 transition-opacity duration-300">
+    <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-sm w-full space-y-6">
+      <div class="text-center space-y-2">
+        <img src="logo.png" alt="โลโก้ร้านแว่นตาดูดีการแว่น" width="256" height="256"
+             class="w-28 h-28 mx-auto mb-1 drop-shadow-sm" decoding="async">
+        <h1 id="login-title" class="text-2xl font-bold text-gray-900">ดูดีการแว่น</h1>
+        <p class="text-xs font-medium text-blue-700 tracking-wide">ระบบบริหารจัดการร้านแว่นตา · OptiCare Pro</p>
+        <p id="login-subtitle" class="text-sm text-gray-500 pt-1">กำลังเตรียมระบบ…</p>
+      </div>
+
+      <!-- เข้าสู่ระบบด้วยบัญชีที่ผู้ดูแลสร้างให้ -->
+      <div id="login-form-panel" class="hidden">
+        <form id="login-form" class="space-y-3" novalidate>
+          <div>
+            <label for="login-username" class="block text-xs font-semibold text-gray-700 mb-1">ชื่อผู้ใช้</label>
+            <div class="relative">
+              <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400" aria-hidden="true">
+                <i class="fa-solid fa-user"></i>
+              </span>
+              <input type="text" id="login-username" name="username" required autocomplete="username"
+                     autocapitalize="none" autocorrect="off" spellcheck="false" maxlength="32"
+                     class="w-full pl-10 pr-3 py-2.5 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none"
+                     placeholder="เช่น admin">
+            </div>
+          </div>
+
+          <div>
+            <label for="login-password" class="block text-xs font-semibold text-gray-700 mb-1">รหัสผ่าน</label>
+            <div class="relative">
+              <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400" aria-hidden="true">
+                <i class="fa-solid fa-lock"></i>
+              </span>
+              <input type="password" id="login-password" name="password" required autocomplete="current-password"
+                     class="w-full pl-10 pr-11 py-2.5 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none"
+                     placeholder="••••••••">
+              <button type="button" data-action="toggle-password" data-target="login-password"
+                      class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
+                      aria-label="แสดงหรือซ่อนรหัสผ่าน" aria-pressed="false">
+                <i class="fa-solid fa-eye" aria-hidden="true"></i>
+              </button>
+            </div>
+          </div>
+
+          <button type="submit" id="login-submit"
+                  class="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-60 disabled:cursor-not-allowed text-white font-bold py-3 rounded-xl shadow-md transition flex items-center justify-center gap-2">
+            <i class="fa-solid fa-right-to-bracket" aria-hidden="true"></i>
+            <span>เข้าสู่ระบบ</span>
+          </button>
+
+          <p id="login-error" role="alert" class="hidden text-rose-600 text-xs font-medium bg-rose-50 border border-rose-200 rounded-lg p-3 leading-relaxed"></p>
+        </form>
+      </div>
+
+      <!-- บังคับตั้งรหัสผ่านใหม่ (บัญชีใหม่ หรือถูกผู้ดูแลรีเซ็ตรหัส) -->
+      <div id="login-change-password" class="hidden">
+        <form id="change-password-form" class="space-y-3" novalidate>
+          <div class="bg-amber-50 border border-amber-200 rounded-xl p-3 text-xs text-amber-900 leading-relaxed">
+            <p class="font-bold mb-0.5">ตั้งรหัสผ่านใหม่ก่อนเริ่มใช้งาน</p>
+            <p id="change-password-hint">รหัสผ่านต้องยาวอย่างน้อย 8 ตัวอักษร และมีทั้งตัวอักษรและตัวเลข</p>
+          </div>
+
+          <div>
+            <label for="current-password" class="block text-xs font-semibold text-gray-700 mb-1">รหัสผ่านเดิม</label>
+            <input type="password" id="current-password" required autocomplete="current-password"
+                   class="w-full px-3 py-2.5 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none">
+          </div>
+          <div>
+            <label for="new-password" class="block text-xs font-semibold text-gray-700 mb-1">รหัสผ่านใหม่</label>
+            <div class="relative">
+              <input type="password" id="new-password" required autocomplete="new-password"
+                     class="w-full px-3 pr-11 py-2.5 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none">
+              <button type="button" data-action="toggle-password" data-target="new-password"
+                      class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
+                      aria-label="แสดงหรือซ่อนรหัสผ่าน" aria-pressed="false">
+                <i class="fa-solid fa-eye" aria-hidden="true"></i>
+              </button>
+            </div>
+          </div>
+          <div>
+            <label for="confirm-password" class="block text-xs font-semibold text-gray-700 mb-1">ยืนยันรหัสผ่านใหม่</label>
+            <input type="password" id="confirm-password" required autocomplete="new-password"
+                   class="w-full px-3 py-2.5 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none">
+          </div>
+
+          <button type="submit"
+                  class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-xl shadow-md transition flex items-center justify-center gap-2">
+            <i class="fa-solid fa-key" aria-hidden="true"></i>
+            <span>บันทึกรหัสผ่านใหม่</span>
+          </button>
+
+          <p id="change-password-error" role="alert" class="hidden text-rose-600 text-xs font-medium bg-rose-50 border border-rose-200 rounded-lg p-3 leading-relaxed"></p>
+        </form>
+      </div>
+
+      <!-- ล็อกหน้าจอในโหมดออฟไลน์ (ไม่มีบัญชีผู้ใช้ให้ตรวจ) -->
+      <div id="login-offline" class="hidden space-y-3">
+        <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 text-xs text-slate-700 leading-relaxed">
+          <p class="font-bold text-slate-900 mb-1">
+            <i class="fa-solid fa-lock mr-1" aria-hidden="true"></i>
+            ล็อกหน้าจอแล้ว
+          </p>
+          <p>ข้อมูลทั้งหมดเก็บอยู่ในเครื่องนี้เท่านั้น ยังอยู่ครบไม่ได้ถูกลบ</p>
+          <p class="text-2xs text-slate-500 mt-2">
+            โหมดออฟไลน์ไม่มีบัญชีผู้ใช้และรหัสผ่าน การล็อกนี้เป็นเพียงการบังหน้าจอไม่ให้เห็นข้อมูลลูกค้า
+            ไม่ได้ป้องกันผู้ที่เข้าถึงเครื่องนี้ได้ — ถ้าต้องการความปลอดภัยจริงให้เชื่อมต่อเซิร์ฟเวอร์
+          </p>
+        </div>
+        <button type="button" data-action="unlock-offline"
+                class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl shadow-md transition flex items-center justify-center gap-2">
+          <i class="fa-solid fa-lock-open" aria-hidden="true"></i>
+          <span>กลับเข้าใช้งาน</span>
+        </button>
+        <button type="button" data-action="open-backend-settings-from-login"
+                class="w-full border border-gray-200 text-gray-600 hover:bg-gray-50 font-semibold py-2.5 rounded-xl text-xs transition">
+          เชื่อมต่อเซิร์ฟเวอร์เพื่อใช้บัญชีผู้ใช้จริง
+        </button>
+      </div>
+
+      <!-- ระหว่างตรวจสอบสถานะเซิร์ฟเวอร์ -->
+      <div id="login-checking" class="text-center py-4">
+        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-3" aria-hidden="true"></div>
+        <p class="text-xs text-gray-500">กำลังตรวจสอบการเชื่อมต่อเซิร์ฟเวอร์…</p>
+      </div>
+
+      <!-- ยังไม่ได้ตั้งค่าเซิร์ฟเวอร์ หรือยังไม่มีบัญชีผู้ใช้ -->
+      <div id="login-setup" class="hidden space-y-3">
+        <div class="bg-amber-50 border border-amber-200 rounded-xl p-4 text-xs text-amber-900 leading-relaxed">
+          <p class="font-bold mb-1" id="login-setup-title">ยังไม่ได้เชื่อมต่อเซิร์ฟเวอร์</p>
+          <p id="login-setup-detail">ระบบยืนยันตัวตนทำงานที่ฝั่งเซิร์ฟเวอร์ จึงต้องตั้งค่าการเชื่อมต่อก่อนเข้าใช้งาน</p>
+        </div>
+        <button type="button" data-action="open-backend-settings-from-login"
+                class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl shadow-md transition flex items-center justify-center space-x-2">
+          <i class="fa-solid fa-gear" aria-hidden="true"></i>
+          <span>ตั้งค่าการเชื่อมต่อ</span>
+        </button>
+        <button type="button" data-action="retry-auth"
+                class="w-full border border-gray-200 text-gray-600 hover:bg-gray-50 font-semibold py-2.5 rounded-xl text-xs transition">
+          ลองเชื่อมต่ออีกครั้ง
+        </button>
+        <button type="button" data-action="use-offline-mode"
+                class="w-full border border-gray-200 text-gray-600 hover:bg-gray-50 font-semibold py-2.5 rounded-xl text-xs transition">
+          ใช้งานแบบออฟไลน์ (ข้อมูลเก็บในเครื่องนี้เท่านั้น)
+        </button>
+      </div>
+
+      <div class="text-center border-t border-gray-100 pt-4">
+        <p id="login-footnote" class="text-2xs text-gray-400 leading-snug">
+          ผู้ดูแลระบบเป็นผู้สร้างบัญชีและกำหนดสิทธิ์ การตรวจสอบสิทธิ์ทั้งหมดทำที่ฝั่งเซิร์ฟเวอร์เสมอ
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== APP SHELL ==================== -->
+  <div id="app-shell" class="flex flex-col flex-grow">
+
+    <!-- Navigation Bar -->
+    <header id="app-nav" class="bg-blue-900 text-white shadow-lg sticky top-0 z-50">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between h-16">
+          <div class="flex items-center">
+            <div class="flex-shrink-0 flex items-center gap-2.5">
+              <img src="logo.png" alt="โลโก้ร้านแว่นตาดูดีการแว่น" width="256" height="256"
+                   class="w-10 h-10 rounded-full bg-white shadow-sm ring-1 ring-white/30" decoding="async">
+              <span class="leading-tight">
+                <span class="block font-bold text-lg tracking-wide">ดูดีการแว่น</span>
+                <span class="block text-2xs text-sky-300 tracking-wider">OptiCare&nbsp;Pro</span>
+              </span>
+            </div>
+            <!-- แสดงที่ lg ขึ้นไป เพราะต่ำกว่านั้นความกว้างไม่พอ ใช้แถบล่างแทน -->
+            <nav aria-label="เมนูหลัก" class="hidden lg:ml-4 lg:flex lg:items-center lg:gap-0.5 xl:ml-6 xl:gap-1">
+              <button type="button" data-action="switch-tab" data-tab="dashboard" id="btn-dashboard"
+                      class="nav-btn whitespace-nowrap px-2.5 xl:px-3 py-2 rounded-md text-sm font-medium hover:bg-blue-800 transition">
+                <i class="fa-solid fa-chart-line mr-1" aria-hidden="true"></i> แผงควบคุม
+              </button>
+              <button type="button" data-action="switch-tab" data-tab="customers" id="btn-customers"
+                      title="ข้อมูลลูกค้า &amp; ประวัติค่าสายตา"
+                      class="nav-btn whitespace-nowrap px-2.5 xl:px-3 py-2 rounded-md text-sm font-medium hover:bg-blue-800 transition">
+                <i class="fa-solid fa-users mr-1" aria-hidden="true"></i> ลูกค้า &amp; ค่าสายตา
+              </button>
+              <button type="button" data-action="switch-tab" data-tab="inventory" id="btn-inventory"
+                      class="nav-btn whitespace-nowrap px-2.5 xl:px-3 py-2 rounded-md text-sm font-medium hover:bg-blue-800 transition">
+                <i class="fa-solid fa-boxes-stacked mr-1" aria-hidden="true"></i> คลังสินค้า
+              </button>
+              <button type="button" data-action="switch-tab" data-tab="orders" id="btn-orders"
+                      title="ออเดอร์ &amp; งานแล็บ"
+                      class="nav-btn whitespace-nowrap px-2.5 xl:px-3 py-2 rounded-md text-sm font-medium hover:bg-blue-800 transition">
+                <i class="fa-solid fa-receipt mr-1" aria-hidden="true"></i> ออเดอร์ &amp; แล็บ
+              </button>
+              <button type="button" data-action="switch-tab" data-tab="ai-consult" id="btn-ai-consult"
+                      title="ผู้ช่วยวิเคราะห์ค่าสายตา &amp; แนะนำเลนส์"
+                      class="nav-btn whitespace-nowrap px-2.5 xl:px-3 py-2 rounded-md text-sm font-medium hover:bg-blue-800 transition">
+                <i class="fa-solid fa-robot mr-1 text-sky-300" aria-hidden="true"></i> แนะนำเลนส์
+              </button>
+            </nav>
+          </div>
+
+          <div class="flex items-center gap-2 sm:gap-3">
+            <div class="text-right hidden sm:block max-w-[9rem] xl:max-w-[12rem]">
+              <p class="text-xs text-sky-300 truncate" id="session-role">ยังไม่ได้เข้าสู่ระบบ</p>
+              <p class="text-sm font-semibold truncate" id="session-name">—</p>
+            </div>
+            <div id="session-avatar" class="h-10 w-10 flex-shrink-0 rounded-full bg-sky-500 flex items-center justify-center text-white font-bold overflow-hidden" aria-hidden="true">
+              <i class="fa-solid fa-user"></i>
+            </div>
+            <button type="button" data-action="change-password" id="btn-change-password"
+                    class="hidden flex-shrink-0 bg-blue-800 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold shadow-md transition items-center gap-1.5">
+              <i class="fa-solid fa-key" aria-hidden="true"></i>
+              <span class="hidden xl:inline">เปลี่ยนรหัสผ่าน</span>
+              <span class="sr-only xl:hidden">เปลี่ยนรหัสผ่าน</span>
+            </button>
+            <button type="button" data-action="open-users" id="btn-manage-users"
+                    class="hidden flex-shrink-0 bg-blue-800 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold shadow-md transition items-center gap-1.5">
+              <i class="fa-solid fa-users-gear" aria-hidden="true"></i>
+              <span class="hidden xl:inline">ผู้ใช้ระบบ</span>
+              <span class="sr-only xl:hidden">ผู้ใช้ระบบ</span>
+            </button>
+            <button type="button" data-action="logout"
+                    class="flex-shrink-0 bg-rose-600 hover:bg-rose-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold shadow-md transition flex items-center gap-1.5">
+              <i class="fa-solid fa-right-from-bracket" aria-hidden="true"></i>
+              <span class="hidden xl:inline">ออกจากระบบ</span>
+              <span class="sr-only xl:hidden">ออกจากระบบ</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Mobile Bottom Navigation -->
+    <nav id="mobile-nav" aria-label="เมนูหลัก (มือถือ)"
+         class="lg:hidden fixed bottom-0 left-0 right-0 bg-blue-900 text-white shadow-lg z-50 flex justify-around py-2 border-t border-blue-800">
+      <button type="button" data-action="switch-tab" data-tab="dashboard" id="mob-dashboard"
+              class="flex flex-col items-center text-2xs text-gray-400 px-2">
+        <i class="fa-solid fa-chart-line text-lg" aria-hidden="true"></i>
+        <span>แดชบอร์ด</span>
+      </button>
+      <button type="button" data-action="switch-tab" data-tab="customers" id="mob-customers"
+              class="flex flex-col items-center text-2xs text-gray-400 px-2">
+        <i class="fa-solid fa-users text-lg" aria-hidden="true"></i>
+        <span>ลูกค้า</span>
+      </button>
+      <button type="button" data-action="switch-tab" data-tab="inventory" id="mob-inventory"
+              class="flex flex-col items-center text-2xs text-gray-400 px-2">
+        <i class="fa-solid fa-boxes-stacked text-lg" aria-hidden="true"></i>
+        <span>คลัง</span>
+      </button>
+      <button type="button" data-action="switch-tab" data-tab="orders" id="mob-orders"
+              class="flex flex-col items-center text-2xs text-gray-400 px-2">
+        <i class="fa-solid fa-receipt text-lg" aria-hidden="true"></i>
+        <span>ออเดอร์</span>
+      </button>
+      <button type="button" data-action="switch-tab" data-tab="ai-consult" id="mob-ai-consult"
+              class="flex flex-col items-center text-2xs text-gray-400 px-2">
+        <i class="fa-solid fa-robot text-lg" aria-hidden="true"></i>
+        <span>แนะนำเลนส์</span>
+      </button>
+    </nav>
+
+    <!-- หัวกระดาษสำหรับสั่งพิมพ์ — ซ่อนบนหน้าจอ แสดงเฉพาะตอนพิมพ์ -->
+    <div id="print-letterhead" aria-hidden="true">
+      <img src="logo.png" alt="" width="256" height="256">
+      <div>
+        <strong>ร้านแว่นตาดูดีการแว่น</strong>
+        <span>เห็นชัด มั่นใจ ดูดี ทุกมุมมอง</span>
+      </div>
+    </div>
+
+    <!-- ==================== MAIN CONTENT ==================== -->
+    <main id="main-content" class="flex-grow max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 pb-24 lg:pb-12">
+
+      <!-- ---------- TAB 1: DASHBOARD ---------- -->
+      <section id="tab-dashboard" class="space-y-6" aria-labelledby="dashboard-heading" tabindex="-1">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div>
+            <h1 id="dashboard-heading" class="text-2xl sm:text-3xl font-bold text-gray-900">แผงควบคุมร้านแว่นตา</h1>
+            <p class="text-sm text-gray-500">ภาพรวมการดำเนินงานของร้าน</p>
+          </div>
+          <div class="bg-white px-4 py-2 rounded-lg shadow-sm border border-gray-200 flex items-center space-x-2">
+            <span id="db-status-indicator" class="w-2.5 h-2.5 rounded-full bg-emerald-500" aria-hidden="true"></span>
+            <span class="text-xs sm:text-sm font-medium text-gray-600" id="db-status-text">กำลังเตรียมระบบ…</span>
+          </div>
+        </div>
+
+        <!-- KPI หลัก (ตัวชี้วัดผลการดำเนินงาน) -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+          <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+            <div class="flex items-center justify-between gap-2">
+              <p class="text-xs text-gray-500 font-medium">ยอดขายเดือนนี้</p>
+              <span class="p-2 rounded-lg bg-blue-50 text-blue-600" aria-hidden="true">
+                <i class="fa-solid fa-money-bill-wave"></i>
+              </span>
+            </div>
+            <p class="text-2xl font-bold text-gray-900 mt-2" id="kpi-revenue">฿0</p>
+            <p class="text-2xs text-gray-500 mt-1" id="kpi-revenue-delta">เทียบเดือนก่อน —</p>
+          </div>
+
+          <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+            <div class="flex items-center justify-between gap-2">
+              <p class="text-xs text-gray-500 font-medium">กำไรขั้นต้นเดือนนี้</p>
+              <span class="p-2 rounded-lg bg-emerald-50 text-emerald-600" aria-hidden="true">
+                <i class="fa-solid fa-chart-pie"></i>
+              </span>
+            </div>
+            <p class="text-2xl font-bold text-gray-900 mt-2" id="kpi-margin">฿0</p>
+            <p class="text-2xs text-gray-500 mt-1" id="kpi-margin-rate">อัตรากำไรขั้นต้น —</p>
+          </div>
+
+          <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+            <div class="flex items-center justify-between gap-2">
+              <p class="text-xs text-gray-500 font-medium">ยอดเฉลี่ยต่อบิล</p>
+              <span class="p-2 rounded-lg bg-indigo-50 text-indigo-600" aria-hidden="true">
+                <i class="fa-solid fa-receipt"></i>
+              </span>
+            </div>
+            <p class="text-2xl font-bold text-gray-900 mt-2" id="kpi-atv">฿0</p>
+            <p class="text-2xs text-gray-500 mt-1" id="kpi-atv-detail">จากบิลที่ส่งมอบแล้ว —</p>
+          </div>
+
+          <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+            <div class="flex items-center justify-between gap-2">
+              <p class="text-xs text-gray-500 font-medium">งานแล็บค้างส่ง</p>
+              <span class="p-2 rounded-lg bg-amber-50 text-amber-600" aria-hidden="true">
+                <i class="fa-solid fa-flask"></i>
+              </span>
+            </div>
+            <p class="text-2xl font-bold text-gray-900 mt-2" id="dash-pending-labs">0 รายการ</p>
+            <p class="text-2xs text-gray-500 mt-1" id="kpi-lab-overdue">เกินกำหนดนัดรับ —</p>
+          </div>
+        </div>
+
+        <!-- ตัวชี้วัดรอง -->
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          <div class="bg-white px-4 py-3 rounded-lg border border-gray-100 flex items-center justify-between gap-2">
+            <span class="text-xs text-gray-500">ผู้รับบริการทั้งหมด</span>
+            <strong class="text-sm font-bold text-gray-900" id="dash-customers-count">0 คน</strong>
+          </div>
+          <div class="bg-white px-4 py-3 rounded-lg border border-gray-100 flex items-center justify-between gap-2">
+            <span class="text-xs text-gray-500">ลูกค้าใหม่เดือนนี้</span>
+            <strong class="text-sm font-bold text-emerald-600" id="kpi-new-customers">0 คน</strong>
+          </div>
+          <div class="bg-white px-4 py-3 rounded-lg border border-gray-100 flex items-center justify-between gap-2">
+            <span class="text-xs text-gray-500">สินค้าใกล้หมด</span>
+            <strong class="text-sm font-bold text-rose-600" id="dash-low-stock">0 รายการ</strong>
+          </div>
+          <button type="button" data-action="show-recall"
+                  class="bg-white px-4 py-3 rounded-lg border border-gray-100 hover:border-blue-400 transition flex items-center justify-between gap-2 text-left">
+            <span class="text-xs text-gray-500">ถึงกำหนดตรวจซ้ำ</span>
+            <strong class="text-sm font-bold text-amber-600" id="kpi-recall">0 คน</strong>
+          </button>
+        </div>
+
+        <!-- รายการเฝ้าระวังทางคลินิก -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100">
+          <div class="p-4 sm:p-6 border-b border-gray-100 flex justify-between items-center gap-2">
+            <div>
+              <h2 class="text-lg font-bold text-gray-900 flex items-center space-x-2">
+                <i class="fa-solid fa-stethoscope text-rose-500" aria-hidden="true"></i>
+                <span>รายการเฝ้าระวังทางคลินิก</span>
+              </h2>
+              <p class="text-2xs text-gray-500 mt-0.5">
+                ผู้รับบริการที่ค่าสายตาเข้าเกณฑ์ต้องติดตามหรือพิจารณาส่งต่อจักษุแพทย์
+              </p>
+            </div>
+            <span id="clinical-alert-count" class="px-2 py-0.5 rounded text-2xs font-semibold bg-gray-100 text-gray-600 whitespace-nowrap">0 ราย</span>
+          </div>
+          <div id="clinical-watch-list" class="divide-y divide-gray-100"></div>
+        </div>
+
+        <!-- Main Dashboard Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div class="space-y-6 lg:col-span-1">
+
+            <!-- การเชื่อมต่อฐานข้อมูล -->
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200 space-y-4">
+              <div class="flex justify-between items-center border-b border-gray-100 pb-2 gap-2">
+                <h2 class="text-sm font-bold text-gray-900 flex items-center space-x-2">
+                  <i class="fa-solid fa-database text-blue-600" aria-hidden="true"></i>
+                  <span>การเชื่อมต่อฐานข้อมูล</span>
+                </h2>
+                <button type="button" data-action="open-backend-settings" aria-label="ตั้งค่าการเชื่อมต่อ"
+                        class="text-gray-400 hover:text-blue-600 transition p-1">
+                  <i class="fa-solid fa-gear" aria-hidden="true"></i>
+                </button>
+              </div>
+
+              <div class="flex items-center justify-between gap-2 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2">
+                <div class="min-w-0">
+                  <p class="text-xs font-semibold text-gray-700">โหมดการทำงาน</p>
+                  <p class="text-2xs text-gray-500 truncate" id="backend-mode-text">ข้อมูลในเครื่อง (Local)</p>
+                </div>
+                <span id="diagnostic-badge" class="px-2 py-0.5 rounded text-2xs font-semibold bg-gray-100 text-gray-600 whitespace-nowrap">
+                  ออฟไลน์
+                </span>
+              </div>
+
+              <dl class="text-xs space-y-2 text-gray-600">
+                <div class="flex justify-between gap-2">
+                  <dt>แหล่งข้อมูลปัจจุบัน:</dt>
+                  <dd><strong id="diag-env-type" class="text-gray-900 text-right">ข้อมูลในเครื่อง (Local)</strong></dd>
+                </div>
+                <div class="flex justify-between gap-2">
+                  <dt>คลังสินค้า (Products):</dt>
+                  <dd><strong id="diag-sheet-products" class="text-gray-500 text-right">ยังไม่ได้ซิงค์</strong></dd>
+                </div>
+                <div class="flex justify-between gap-2">
+                  <dt>ข้อมูลลูกค้า (Customers):</dt>
+                  <dd><strong id="diag-sheet-customers" class="text-gray-500 text-right">ยังไม่ได้ซิงค์</strong></dd>
+                </div>
+                <div class="flex justify-between gap-2">
+                  <dt>สถานะล่าสุด:</dt>
+                  <dd><strong id="diag-api-status" class="text-gray-500 text-right">ยังไม่มีการซิงค์ในเซสชันนี้</strong></dd>
+                </div>
+              </dl>
+
+              <!-- โหมด Apps Script API (อ่าน-เขียนสองทาง) -->
+              <div id="backend-api-actions" class="hidden grid grid-cols-1 gap-2 pt-2">
+                <button type="button" data-action="backend-pull" id="btn-backend-pull"
+                        class="w-full py-2 bg-blue-50 text-blue-700 hover:bg-blue-100 disabled:opacity-50 disabled:cursor-not-allowed font-semibold rounded-lg text-xs transition flex items-center justify-center space-x-1.5 shadow-sm">
+                  <i class="fa-solid fa-cloud-arrow-down" id="backend-pull-icon" aria-hidden="true"></i>
+                  <span>ดึงข้อมูลทั้งหมดจากเซิร์ฟเวอร์</span>
+                </button>
+                <button type="button" data-action="backend-push" id="btn-backend-push"
+                        class="w-full py-2 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 disabled:opacity-50 disabled:cursor-not-allowed font-semibold rounded-lg text-xs transition flex items-center justify-center space-x-1.5 shadow-sm">
+                  <i class="fa-solid fa-cloud-arrow-up" id="backend-push-icon" aria-hidden="true"></i>
+                  <span>ส่งข้อมูลในเครื่องขึ้นเซิร์ฟเวอร์</span>
+                </button>
+                <button type="button" data-action="backend-diagnose"
+                        class="w-full py-2 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 font-semibold rounded-lg text-xs transition flex items-center justify-center space-x-1.5 shadow-sm">
+                  <i class="fa-solid fa-stethoscope" aria-hidden="true"></i>
+                  <span>ตรวจสุขภาพฐานข้อมูล</span>
+                </button>
+                <button type="button" data-action="backend-repair" id="btn-backend-repair"
+                        class="w-full py-2 bg-amber-50 text-amber-800 hover:bg-amber-100 disabled:opacity-50 disabled:cursor-not-allowed font-semibold rounded-lg text-xs transition flex items-center justify-center space-x-1.5 shadow-sm">
+                  <i class="fa-solid fa-screwdriver-wrench" id="backend-repair-icon" aria-hidden="true"></i>
+                  <span>ซ่อมบำรุงฐานข้อมูล</span>
+                </button>
+              </div>
+
+              <!-- โหมดอ่านจาก Google Sheets โดยตรง (gviz) -->
+              <div id="backend-sheet-actions" class="grid grid-cols-1 gap-2 pt-2">
+                <button type="button" data-action="sync-products" id="btn-sync-products"
+                        class="w-full py-2 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 disabled:opacity-50 disabled:cursor-not-allowed font-semibold rounded-lg text-xs transition flex items-center justify-center space-x-1.5 shadow-sm">
+                  <i class="fa-solid fa-cloud-arrow-down" id="conn-test-icon" aria-hidden="true"></i>
+                  <span>ดึงข้อมูลคลัง (Products)</span>
+                </button>
+                <button type="button" data-action="sync-customers" id="btn-sync-customers"
+                        class="w-full py-2 bg-blue-50 text-blue-700 hover:bg-blue-100 disabled:opacity-50 disabled:cursor-not-allowed font-semibold rounded-lg text-xs transition flex items-center justify-center space-x-1.5 shadow-sm">
+                  <i class="fa-solid fa-users-gear" id="cust-sync-icon" aria-hidden="true"></i>
+                  <span>ดึงรายชื่อลูกค้า (Customers)</span>
+                </button>
+                <button type="button" data-action="sync-report"
+                        class="w-full py-2 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 font-semibold rounded-lg text-xs transition flex items-center justify-center space-x-1.5 shadow-sm">
+                  <i class="fa-solid fa-clipboard-check" aria-hidden="true"></i>
+                  <span>รายงานการเชื่อมต่อ &amp; ดูข้อมูลในชีต</span>
+                </button>
+              </div>
+
+              <div class="grid grid-cols-1 gap-2">
+                <button type="button" data-action="reset-data"
+                        class="w-full py-2 bg-gray-50 text-gray-600 hover:bg-gray-100 font-semibold rounded-lg text-xs transition flex items-center justify-center space-x-1.5 shadow-sm">
+                  <i class="fa-solid fa-rotate-left" aria-hidden="true"></i>
+                  <span>ล้างข้อมูลในเครื่อง &amp; เริ่มต้นใหม่</span>
+                </button>
+              </div>
+
+              <p id="backend-hint-sheet" class="text-2xs text-gray-400 leading-tight mt-2 text-center">
+                ระบบจะอ่านแผ่นงานชื่อ <strong class="text-gray-600">Products</strong> และ
+                <strong class="text-gray-600">Customers</strong> (หรือ <strong class="text-gray-600">ลูกค้า</strong>)
+                จากไฟล์ชีทเดียวกัน โดยชีทต้องตั้งค่าแชร์เป็น “ผู้ที่มีลิงก์สามารถดูได้”
+              </p>
+              <p id="backend-hint-api" class="hidden text-2xs text-gray-400 leading-tight mt-2 text-center">
+                บันทึกทุกครั้งจะเขียนขึ้น Google Sheets อัตโนมัติ หากเซิร์ฟเวอร์ไม่ตอบสนอง
+                ข้อมูลจะยังถูกเก็บไว้ในเครื่องและส่งขึ้นใหม่ได้ด้วยปุ่ม “ส่งข้อมูลในเครื่องขึ้นเซิร์ฟเวอร์”
+              </p>
+              <p id="backend-hint-local" class="hidden text-2xs text-gray-400 leading-tight mt-2 text-center">
+                ข้อมูลถูกเก็บในเบราว์เซอร์เครื่องนี้เท่านั้น ไม่ซิงค์ข้ามเครื่อง
+                กดไอคอนเฟืองเพื่อเชื่อมต่อกับ Google Sheets
+              </p>
+            </div>
+
+            <!-- Shortcuts -->
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 space-y-4">
+              <h2 class="text-lg font-bold text-gray-900">ทางลัดการบริหารจัดการ</h2>
+              <div class="grid grid-cols-1 gap-3">
+                <button type="button" data-action="quick-new-customer"
+                        class="flex items-center space-x-3 p-3 rounded-lg border border-gray-200 hover:border-blue-500 hover:bg-blue-50 transition text-left group">
+                  <span class="p-2 rounded bg-blue-100 text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition">
+                    <i class="fa-solid fa-user-pen" aria-hidden="true"></i>
+                  </span>
+                  <span class="block">
+                    <span class="block font-semibold text-sm">ลงทะเบียนลูกค้าใหม่</span>
+                    <span class="block text-xs text-gray-500">บันทึกข้อมูลส่วนตัวและค่าสายตา</span>
+                  </span>
+                </button>
+                <button type="button" data-action="quick-new-order"
+                        class="flex items-center space-x-3 p-3 rounded-lg border border-gray-200 hover:border-blue-500 hover:bg-blue-50 transition text-left group">
+                  <span class="p-2 rounded bg-emerald-100 text-emerald-600 group-hover:bg-emerald-600 group-hover:text-white transition">
+                    <i class="fa-solid fa-cart-plus" aria-hidden="true"></i>
+                  </span>
+                  <span class="block">
+                    <span class="block font-semibold text-sm">เปิดบิลขาย / งานแล็บ</span>
+                    <span class="block text-xs text-gray-500">สั่งตัดเลนส์และประกอบแว่น</span>
+                  </span>
+                </button>
+                <button type="button" data-action="switch-tab" data-tab="inventory"
+                        class="flex items-center space-x-3 p-3 rounded-lg border border-gray-200 hover:border-blue-500 hover:bg-blue-50 transition text-left group">
+                  <span class="p-2 rounded bg-amber-100 text-amber-600 group-hover:bg-amber-600 group-hover:text-white transition">
+                    <i class="fa-solid fa-boxes-packing" aria-hidden="true"></i>
+                  </span>
+                  <span class="block">
+                    <span class="block font-semibold text-sm">เช็คสต็อกด่วน</span>
+                    <span class="block text-xs text-gray-500">กรอบแว่น เลนส์ และคอนแทคเลนส์</span>
+                  </span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Lab progress -->
+          <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 lg:col-span-2 space-y-4">
+            <div class="flex justify-between items-center gap-2">
+              <div>
+                <h2 class="text-lg font-bold text-gray-900">ความคืบหน้างานฝนประกอบเลนส์</h2>
+                <p class="text-2xs text-gray-500 mt-0.5">เรียงตามอายุงานในแล็บ — สีแดงคือเลยวันนัดรับแล้ว</p>
+              </div>
+              <button type="button" data-action="switch-tab" data-tab="orders"
+                      class="text-sm text-blue-600 hover:underline whitespace-nowrap">ดูทั้งหมด</button>
+            </div>
+            <div class="table-scroll">
+              <table class="w-full text-left border-collapse">
+                <caption class="sr-only">รายการงานแล็บที่ยังไม่ส่งมอบ</caption>
+                <thead>
+                  <tr class="border-b border-gray-200 text-xs text-gray-500 uppercase tracking-wider">
+                    <th scope="col" class="py-3 px-4 font-semibold">เลขออเดอร์</th>
+                    <th scope="col" class="py-3 px-4 font-semibold">ผู้รับบริการ</th>
+                    <th scope="col" class="py-3 px-4 font-semibold">เลนส์ที่สั่งตัด</th>
+                    <th scope="col" class="py-3 px-4 font-semibold text-center">อายุงาน</th>
+                    <th scope="col" class="py-3 px-4 font-semibold text-center">นัดรับ</th>
+                    <th scope="col" class="py-3 px-4 font-semibold text-center">สถานะแล็บ</th>
+                  </tr>
+                </thead>
+                <tbody id="dash-orders-table" class="divide-y divide-gray-100 text-sm"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recent customers -->
+        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 space-y-4 mt-6">
+          <div class="flex justify-between items-center border-b border-gray-100 pb-2 gap-2">
+            <h2 class="text-lg font-bold text-gray-900 flex items-center space-x-2">
+              <i class="fa-solid fa-users-viewfinder text-blue-600" aria-hidden="true"></i>
+              <span>ลูกค้าที่บันทึกล่าสุด</span>
+            </h2>
+            <button type="button" data-action="switch-tab" data-tab="customers"
+                    class="text-sm text-blue-600 hover:underline font-medium whitespace-nowrap">จัดการข้อมูลลูกค้าทั้งหมด</button>
+          </div>
+          <div class="table-scroll">
+            <table class="w-full text-left border-collapse">
+              <caption class="sr-only">ลูกค้า 5 รายล่าสุดในระบบ</caption>
+              <thead>
+                <tr class="bg-gray-50 border-b border-gray-200 text-xs text-gray-500 uppercase tracking-wider">
+                  <th scope="col" class="py-3 px-4 font-semibold rounded-tl-lg">รหัส (ID)</th>
+                  <th scope="col" class="py-3 px-4 font-semibold">ชื่อ-นามสกุล</th>
+                  <th scope="col" class="py-3 px-4 font-semibold">เบอร์โทรศัพท์</th>
+                  <th scope="col" class="py-3 px-4 font-semibold text-center rounded-tr-lg">จัดการด่วน</th>
+                </tr>
+              </thead>
+              <tbody id="dash-customers-table" class="divide-y divide-gray-100 text-sm"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ---------- TAB 2: CUSTOMERS ---------- -->
+      <section id="tab-customers" class="hidden space-y-6" aria-labelledby="customers-heading" tabindex="-1">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div>
+            <h1 id="customers-heading" class="text-2xl sm:text-3xl font-bold text-gray-900">แฟ้มข้อมูลลูกค้า &amp; ประวัติการวัดสายตา</h1>
+            <p class="text-sm text-gray-500 font-medium">บันทึกข้อมูลผู้รับบริการเพื่อการดูแลสายตาที่ต่อเนื่องตามหลักทัศนมาตรศาสตร์</p>
+          </div>
+          <button type="button" data-action="new-customer"
+                  class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2.5 rounded-lg shadow-sm transition flex items-center justify-center space-x-2">
+            <i class="fa-solid fa-user-plus" aria-hidden="true"></i>
+            <span>เพิ่มลูกค้าใหม่</span>
+          </button>
+        </div>
+
+        <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex flex-col md:flex-row gap-4">
+          <div class="relative flex-grow">
+            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400" aria-hidden="true">
+              <i class="fa-solid fa-magnifying-glass"></i>
+            </span>
+            <label class="sr-only" for="customer-search">ค้นหาลูกค้า</label>
+            <input type="search" id="customer-search" placeholder="ค้นหาชื่อลูกค้า, เบอร์โทรศัพท์, หรืออีเมล…"
+                   class="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
+          </div>
+          <div class="flex gap-2">
+            <label class="sr-only" for="customer-filter-gender">กรองตามเพศ</label>
+            <select id="customer-filter-gender"
+                    class="px-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm bg-white">
+              <option value="">ทุกเพศ</option>
+              <option value="ชาย">ชาย</option>
+              <option value="หญิง">หญิง</option>
+              <option value="อื่นๆ">อื่นๆ</option>
+            </select>
+          </div>
+        </div>
+
+        <p class="text-xs text-gray-500" id="customers-count" role="status"></p>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6" id="customers-grid"></div>
+      </section>
+
+      <!-- ---------- TAB 3: INVENTORY ---------- -->
+      <section id="tab-inventory" class="hidden space-y-6" aria-labelledby="inventory-heading" tabindex="-1">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div>
+            <h1 id="inventory-heading" class="text-2xl sm:text-3xl font-bold text-gray-900">ระบบบริหารคลังกรอบแว่นและเลนส์</h1>
+            <p class="text-sm text-gray-500 font-medium">ตรวจสอบจำนวนสินค้าคงคลัง แยกประเภท และแจ้งเตือนสต็อกต่ำกว่ากำหนด</p>
+          </div>
+          <button type="button" data-action="new-product"
+                  class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2.5 rounded-lg shadow-sm transition flex items-center justify-center space-x-2">
+            <i class="fa-solid fa-plus" aria-hidden="true"></i>
+            <span>เพิ่มสินค้าใหม่</span>
+          </button>
+        </div>
+
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <button type="button" data-action="filter-category" data-category="Frame"
+                  class="cat-filter-btn bg-white p-4 rounded-xl shadow-sm border border-gray-200 hover:border-blue-500 transition text-center">
+            <i class="fa-solid fa-glasses text-2xl text-blue-600 mb-2" aria-hidden="true"></i>
+            <span class="block text-sm font-bold text-gray-800">กรอบแว่น (Frames)</span>
+            <span class="block text-xs text-gray-500 mt-1" id="frame-count">0 รายการ</span>
+          </button>
+          <button type="button" data-action="filter-category" data-category="Lens"
+                  class="cat-filter-btn bg-white p-4 rounded-xl shadow-sm border border-gray-200 hover:border-blue-500 transition text-center">
+            <i class="fa-solid fa-circle-notch text-2xl text-emerald-600 mb-2" aria-hidden="true"></i>
+            <span class="block text-sm font-bold text-gray-800">เลนส์สายตา (Lenses)</span>
+            <span class="block text-xs text-gray-500 mt-1" id="lens-count">0 รายการ</span>
+          </button>
+          <button type="button" data-action="filter-category" data-category="ContactLens"
+                  class="cat-filter-btn bg-white p-4 rounded-xl shadow-sm border border-gray-200 hover:border-blue-500 transition text-center">
+            <i class="fa-solid fa-eye text-2xl text-amber-600 mb-2" aria-hidden="true"></i>
+            <span class="block text-sm font-bold text-gray-800">คอนแทคเลนส์</span>
+            <span class="block text-xs text-gray-500 mt-1" id="contact-count">0 รายการ</span>
+          </button>
+          <button type="button" data-action="filter-category" data-category="Accessory"
+                  class="cat-filter-btn bg-white p-4 rounded-xl shadow-sm border border-gray-200 hover:border-blue-500 transition text-center">
+            <i class="fa-solid fa-spray-can text-2xl text-rose-600 mb-2" aria-hidden="true"></i>
+            <span class="block text-sm font-bold text-gray-800">น้ำยา &amp; อุปกรณ์เสริม</span>
+            <span class="block text-xs text-gray-500 mt-1" id="accessory-count">0 รายการ</span>
+          </button>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+          <div class="p-4 border-b border-gray-100 flex flex-col sm:flex-row gap-4 justify-between items-center">
+            <div class="relative w-full sm:w-72">
+              <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400" aria-hidden="true">
+                <i class="fa-solid fa-magnifying-glass"></i>
+              </span>
+              <label class="sr-only" for="inventory-search">ค้นหาสินค้า</label>
+              <input type="search" id="inventory-search" placeholder="ค้นหาชื่อสินค้า, แบรนด์ หรือบาร์โค้ด…"
+                     class="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
+            </div>
+            <div class="flex space-x-2 w-full sm:w-auto">
+              <button type="button" data-action="clear-inventory-filter"
+                      class="flex-1 sm:flex-initial text-xs font-semibold px-3 py-2 rounded border border-gray-200 hover:bg-gray-50">แสดงทั้งหมด</button>
+              <button type="button" data-action="filter-low-stock"
+                      class="flex-1 sm:flex-initial text-xs font-semibold text-rose-600 bg-rose-50 border border-rose-200 px-3 py-2 rounded hover:bg-rose-100">สินค้าใกล้หมดคลัง</button>
+            </div>
+          </div>
+
+          <div class="table-scroll">
+            <table class="w-full text-left border-collapse">
+              <caption class="sr-only">รายการสินค้าในคลัง</caption>
+              <thead>
+                <tr class="bg-gray-50 text-xs font-semibold text-gray-500 uppercase tracking-wider border-b border-gray-200">
+                  <th scope="col" class="py-3 px-6">บาร์โค้ด / รหัส</th>
+                  <th scope="col" class="py-3 px-6">ชื่อสินค้า</th>
+                  <th scope="col" class="py-3 px-6">หมวดหมู่</th>
+                  <th scope="col" class="py-3 px-6 text-right">ราคาจำหน่าย</th>
+                  <th scope="col" class="py-3 px-6 text-center">คงเหลือ</th>
+                  <th scope="col" class="py-3 px-6 text-center">แจ้งเตือนขั้นต่ำ</th>
+                  <th scope="col" class="py-3 px-6 text-center">จัดการ</th>
+                </tr>
+              </thead>
+              <tbody id="inventory-table-body" class="divide-y divide-gray-100 text-sm"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ---------- TAB 4: ORDERS ---------- -->
+      <section id="tab-orders" class="hidden space-y-6" aria-labelledby="orders-heading" tabindex="-1">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div>
+            <h1 id="orders-heading" class="text-2xl sm:text-3xl font-bold text-gray-900">รายการขาย และสถานะห้องแล็บฝนเลนส์</h1>
+            <p class="text-sm text-gray-500 font-medium">ติดตามออเดอร์ตัดแว่นของลูกค้า ตั้งแต่การฝนประกอบเลนส์จนถึงการส่งมอบสินค้า</p>
+          </div>
+          <button type="button" data-action="new-order"
+                  class="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white font-medium px-4 py-2.5 rounded-lg shadow-sm transition flex items-center justify-center space-x-2">
+            <i class="fa-solid fa-cart-plus" aria-hidden="true"></i>
+            <span>สร้างออเดอร์ / สั่งตัดแว่น</span>
+          </button>
+        </div>
+
+        <div class="grid grid-cols-2 md:grid-cols-5 gap-3" role="group" aria-label="กรองออเดอร์ตามสถานะ">
+          <button type="button" data-action="filter-order-status" data-status="all" aria-pressed="true"
+                  class="status-tab-btn p-3 bg-white hover:bg-gray-50 border-b-4 border-blue-600 rounded-lg shadow-sm font-semibold text-sm text-gray-600 text-center transition">
+            ทั้งหมด
+          </button>
+          <button type="button" data-action="filter-order-status" data-status="รอใบสั่งเลนส์" aria-pressed="false"
+                  class="status-tab-btn p-3 bg-white hover:bg-gray-50 border-b-4 border-amber-400 rounded-lg shadow-sm font-semibold text-sm text-gray-600 text-center transition">
+            🕒 รอสั่งเลนส์
+          </button>
+          <button type="button" data-action="filter-order-status" data-status="กำลังฝนเลนส์" aria-pressed="false"
+                  class="status-tab-btn p-3 bg-white hover:bg-gray-50 border-b-4 border-indigo-500 rounded-lg shadow-sm font-semibold text-sm text-gray-600 text-center transition">
+            ⚙️ กำลังฝนประกอบ
+          </button>
+          <button type="button" data-action="filter-order-status" data-status="รอรับสินค้า" aria-pressed="false"
+                  class="status-tab-btn p-3 bg-white hover:bg-gray-50 border-b-4 border-sky-400 rounded-lg shadow-sm font-semibold text-sm text-gray-600 text-center transition">
+            👓 พร้อมรับบริการ
+          </button>
+          <button type="button" data-action="filter-order-status" data-status="สำเร็จ" aria-pressed="false"
+                  class="status-tab-btn p-3 bg-white hover:bg-gray-50 border-b-4 border-emerald-500 rounded-lg shadow-sm font-semibold text-sm text-gray-600 text-center transition">
+            ✅ ส่งมอบแล้ว
+          </button>
+        </div>
+
+        <div class="space-y-4" id="orders-list"></div>
+      </section>
+
+      <!-- ---------- TAB 5: LENS ADVISOR ---------- -->
+      <section id="tab-ai-consult" class="hidden space-y-6" aria-labelledby="ai-heading" tabindex="-1">
+        <div class="bg-gradient-to-r from-blue-900 to-indigo-900 rounded-2xl p-6 sm:p-8 text-white shadow-xl relative overflow-hidden">
+          <div class="absolute right-0 top-0 opacity-10 text-9xl transform translate-x-12 translate-y-4" aria-hidden="true">
+            <i class="fa-solid fa-robot"></i>
+          </div>
+          <div class="max-w-2xl space-y-4 relative z-10">
+            <span class="inline-block bg-sky-400 text-blue-950 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">
+              ระบบช่วยประมวลผลทัศนมาตรศาสตร์ (Offline Expert Engine)
+            </span>
+            <h1 id="ai-heading" class="text-3xl font-extrabold tracking-tight">ผู้ช่วยวิเคราะห์ค่าสายตา &amp; แนะนำเลนส์เชิงลึก</h1>
+            <p class="text-blue-100 text-sm sm:text-base">
+              ประมวลผลด้วยชุดกฎทัศนมาตรศาสตร์ในเบราว์เซอร์ วิเคราะห์ประเภทเลนส์ ดัชนีหักเห (Index)
+              พร้อมบทพูดแนะนำการขาย — ผลลัพธ์ใช้ประกอบการพิจารณา ไม่ใช่การวินิจฉัยทางการแพทย์
+            </p>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <!-- Input form -->
+          <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 lg:col-span-1 space-y-4">
+            <h2 class="text-lg font-bold text-gray-900 flex items-center space-x-2">
+              <i class="fa-solid fa-clipboard-question text-blue-600" aria-hidden="true"></i>
+              <span>ระบุข้อมูลพฤติกรรม &amp; ค่าสายตา</span>
+            </h2>
+
+            <form id="consult-form" class="space-y-4 text-sm" novalidate>
+              <div>
+                <label for="ai-customer-select" class="block text-gray-700 font-medium mb-1">เลือกโปรไฟล์ลูกค้าเพื่อวิเคราะห์ด่วน</label>
+                <select id="ai-customer-select"
+                        class="w-full px-3 py-2 rounded-lg border border-gray-200 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                  <option value="">-- เลือกลูกค้าเพื่อดึงค่าสายตาอัตโนมัติ --</option>
+                </select>
+              </div>
+
+              <div class="grid grid-cols-2 gap-2 border-t border-gray-100 pt-3">
+                <div>
+                  <label for="ai-od-sph" class="block text-gray-500 text-xs font-medium">สั้น/ยาว ตาขวา (OD Sph) *</label>
+                  <input type="number" step="0.25" min="-30" max="30" id="ai-od-sph" required
+                         class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="เช่น -2.50">
+                </div>
+                <div>
+                  <label for="ai-os-sph" class="block text-gray-500 text-xs font-medium">สั้น/ยาว ตาซ้าย (OS Sph) *</label>
+                  <input type="number" step="0.25" min="-30" max="30" id="ai-os-sph" required
+                         class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="เช่น -2.25">
+                </div>
+                <div>
+                  <label for="ai-od-cyl" class="block text-gray-500 text-xs font-medium">เอียงขวา (OD Cyl)</label>
+                  <input type="number" step="0.25" min="-10" max="10" id="ai-od-cyl"
+                         class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="0.00">
+                </div>
+                <div>
+                  <label for="ai-os-cyl" class="block text-gray-500 text-xs font-medium">เอียงซ้าย (OS Cyl)</label>
+                  <input type="number" step="0.25" min="-10" max="10" id="ai-os-cyl"
+                         class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="0.00">
+                </div>
+                <div>
+                  <label for="ai-od-ax" class="block text-gray-500 text-xs font-medium">แกนเอียงขวา (OD Axis)</label>
+                  <input type="number" step="1" min="0" max="180" id="ai-od-ax"
+                         class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="180">
+                </div>
+                <div>
+                  <label for="ai-os-ax" class="block text-gray-500 text-xs font-medium">แกนเอียงซ้าย (OS Axis)</label>
+                  <input type="number" step="1" min="0" max="180" id="ai-os-ax"
+                         class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="180">
+                </div>
+                <div class="col-span-2">
+                  <label for="ai-add" class="block text-gray-500 text-xs font-medium">ค่า ADD มองใกล้ (สำหรับผู้มีสายตายาวตามอายุ)</label>
+                  <input type="number" step="0.25" min="0" max="4" id="ai-add"
+                         class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="เช่น 1.50">
+                </div>
+                <div>
+                  <label for="ai-age" class="block text-gray-500 text-xs font-medium">อายุ (ปี)</label>
+                  <input type="number" min="0" max="120" step="1" id="ai-age"
+                         class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="เช่น 45">
+                </div>
+                <div>
+                  <label for="ai-face-shape" class="block text-gray-500 text-xs font-medium">รูปหน้า (สำหรับแนะนำกรอบ)</label>
+                  <select id="ai-face-shape"
+                          class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white">
+                    <option value="">ไม่ระบุ</option>
+                    <option value="กลม">กลม (Round)</option>
+                    <option value="รูปไข่">รูปไข่ (Oval)</option>
+                    <option value="เหลี่ยม">เหลี่ยม (Square)</option>
+                    <option value="สี่เหลี่ยมผืนผ้า">ยาว/สี่เหลี่ยมผืนผ้า (Oblong)</option>
+                    <option value="หัวใจ">หัวใจ (Heart)</option>
+                    <option value="สามเหลี่ยม">สามเหลี่ยม (Triangle)</option>
+                    <option value="เพชร">เพชร (Diamond)</option>
+                  </select>
+                </div>
+                <div class="col-span-2">
+                  <label for="ai-budget" class="block text-gray-500 text-xs font-medium">งบประมาณโดยประมาณ (บาท)</label>
+                  <input type="number" min="0" step="100" id="ai-budget"
+                         class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="เช่น 8000">
+                </div>
+              </div>
+
+              <fieldset class="border-t border-gray-100 pt-3 space-y-2">
+                <legend class="block text-gray-700 font-medium">ไลฟ์สไตล์และความกังวลหลักของลูกค้า</legend>
+                <div class="grid grid-cols-2 gap-2">
+                  <label class="flex items-center space-x-2 text-xs p-2 border rounded hover:bg-gray-50 cursor-pointer">
+                    <input type="checkbox" id="ls-computer" class="rounded text-blue-600">
+                    <span>ทำงานหน้าคอมพิวเตอร์</span>
+                  </label>
+                  <label class="flex items-center space-x-2 text-xs p-2 border rounded hover:bg-gray-50 cursor-pointer">
+                    <input type="checkbox" id="ls-outdoor" class="rounded text-blue-600">
+                    <span>ชอบกิจกรรมกลางแจ้ง</span>
+                  </label>
+                  <label class="flex items-center space-x-2 text-xs p-2 border rounded hover:bg-gray-50 cursor-pointer">
+                    <input type="checkbox" id="ls-drive" class="rounded text-blue-600">
+                    <span>ขับรถตอนกลางคืนบ่อย</span>
+                  </label>
+                  <label class="flex items-center space-x-2 text-xs p-2 border rounded hover:bg-gray-50 cursor-pointer">
+                    <input type="checkbox" id="ls-sport" class="rounded text-blue-600">
+                    <span>ออกกำลังกาย / เล่นกีฬา</span>
+                  </label>
+                </div>
+              </fieldset>
+
+              <button type="submit" id="btn-request-ai"
+                      class="w-full py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 disabled:opacity-60 text-white font-semibold rounded-lg shadow-md transition flex items-center justify-center space-x-2">
+                <i class="fa-solid fa-wand-magic-sparkles" aria-hidden="true"></i>
+                <span>ประมวลผลทันที</span>
+              </button>
+            </form>
+          </div>
+
+          <!-- Output -->
+          <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 lg:col-span-2 flex flex-col min-h-[400px]">
+            <h2 class="text-lg font-bold text-gray-900 flex items-center space-x-2 mb-4 border-b border-gray-100 pb-2">
+              <i class="fa-solid fa-wand-magic-sparkles text-amber-500" aria-hidden="true"></i>
+              <span>ผลการประเมินและคำแนะนำเชิงคลินิก</span>
+            </h2>
+
+            <div id="ai-loading" class="hidden flex-grow flex flex-col items-center justify-center text-center py-12" role="status">
+              <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4" aria-hidden="true"></div>
+              <p class="text-gray-500 font-medium">กำลังประมวลผลโครงสร้างทางทัศนมาตรศาสตร์…</p>
+            </div>
+
+            <div id="ai-placeholder" class="flex-grow flex flex-col items-center justify-center text-center py-12 text-gray-400">
+              <i class="fa-solid fa-brain text-5xl mb-3 text-slate-300" aria-hidden="true"></i>
+              <p class="font-medium text-slate-600">กรอกค่าสายตาหรือเลือกชื่อลูกค้า จากนั้นกด “ประมวลผลทันที”</p>
+              <p class="text-xs max-w-sm mt-1 text-slate-400">ระบบจะคำนวณวัสดุที่เหมาะสม ดัชนีหักเหของเลนส์ และสร้างบทพูดแนะนำลูกค้า</p>
+            </div>
+
+            <div id="ai-result-content" class="hidden flex-grow space-y-4">
+              <div class="bg-blue-50 border border-blue-200 p-4 rounded-xl flex items-start space-x-3">
+                <i class="fa-solid fa-user-doctor text-blue-600 text-lg mt-0.5" aria-hidden="true"></i>
+                <div>
+                  <h3 class="font-bold text-blue-900 text-sm">สภาวะสายตาที่ประเมินได้ (Clinical Summary)</h3>
+                  <p class="text-xs text-blue-800 mt-1 leading-relaxed" id="ai-diag-summary">-</p>
+                </div>
+              </div>
+
+              <!-- ค่าที่คำนวณได้ทางคลินิก -->
+              <section aria-labelledby="ai-calc-heading" class="border rounded-xl p-4 space-y-3">
+                <h3 id="ai-calc-heading" class="font-bold text-gray-800 text-sm flex items-center space-x-1.5">
+                  <i class="fa-solid fa-square-root-variable text-slate-500" aria-hidden="true"></i>
+                  <span>ค่าที่คำนวณได้ทางคลินิก</span>
+                </h3>
+                <div class="table-scroll">
+                  <table class="w-full text-center border-collapse text-2xs">
+                    <caption class="sr-only">ค่าทางคลินิกที่คำนวณจากค่าสายตาที่กรอก</caption>
+                    <thead>
+                      <tr class="bg-gray-50 text-gray-500 font-semibold">
+                        <th scope="col" class="py-1.5 px-2 border">ข้างตา</th>
+                        <th scope="col" class="py-1.5 px-2 border">Rx (Minus Cyl)</th>
+                        <th scope="col" class="py-1.5 px-2 border">Spherical Equivalent</th>
+                        <th scope="col" class="py-1.5 px-2 border">ชนิดสายตาเอียง</th>
+                        <th scope="col" class="py-1.5 px-2 border">Plus-Cyl Form</th>
+                      </tr>
+                    </thead>
+                    <tbody id="ai-clinical-body" class="bg-white"></tbody>
+                  </table>
+                </div>
+                <div id="ai-clinical-notes" class="space-y-1.5 text-2xs"></div>
+              </section>
+
+              <!-- เหตุผลเชิงวิชาการประกอบคำแนะนำ -->
+              <section id="ai-reasoning-wrap" class="hidden space-y-2" aria-labelledby="ai-reasoning-heading">
+                <h3 id="ai-reasoning-heading" class="font-bold text-gray-800 text-sm flex items-center gap-2">
+                  <i class="fa-solid fa-book-open-reader text-blue-600" aria-hidden="true"></i>
+                  เหตุผลเชิงวิชาการ (Clinical Reasoning)
+                </h3>
+                <p class="text-2xs text-gray-500">
+                  แต่ละข้อระบุสิ่งที่ตรวจพบ · สูตรหรือเกณฑ์ที่ใช้ · และสิ่งที่ควรทำต่อ เพื่อให้ตรวจสอบย้อนกลับได้
+                </p>
+                <div id="ai-reasoning" class="space-y-2"></div>
+              </section>
+
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="p-4 border rounded-xl bg-slate-50/50 space-y-3">
+                  <h3 class="font-bold text-gray-800 text-sm flex items-center space-x-1.5">
+                    <i class="fa-solid fa-glasses text-sky-500" aria-hidden="true"></i>
+                    <span>เลนส์ &amp; ดัชนีหักเหที่แนะนำ</span>
+                  </h3>
+                  <div id="ai-lens-recommendation" class="text-xs text-gray-600 leading-relaxed space-y-1"></div>
+                </div>
+                <div class="p-4 border rounded-xl bg-slate-50/50 space-y-3">
+                  <h3 class="font-bold text-gray-800 text-sm flex items-center space-x-1.5">
+                    <i class="fa-solid fa-shapes text-violet-500" aria-hidden="true"></i>
+                    <span>สไตล์กรอบแว่นที่เข้ากับรูปหน้า</span>
+                  </h3>
+                  <div id="ai-frame-recommendation" class="text-xs text-gray-600 leading-relaxed space-y-1"></div>
+                </div>
+              </div>
+
+              <!-- เปรียบเทียบวัสดุเลนส์ -->
+              <section aria-labelledby="ai-material-heading" class="border rounded-xl p-4 space-y-3">
+                <h3 id="ai-material-heading" class="font-bold text-gray-800 text-sm flex items-center space-x-1.5">
+                  <i class="fa-solid fa-layer-group text-sky-500" aria-hidden="true"></i>
+                  <span>เปรียบเทียบวัสดุเลนส์ตามค่าสายตานี้</span>
+                </h3>
+                <div class="table-scroll">
+                  <table class="w-full text-center border-collapse text-2xs">
+                    <caption class="sr-only">เปรียบเทียบดัชนีหักเห ความหนาขอบ ค่า Abbe และน้ำหนักสัมพัทธ์</caption>
+                    <thead>
+                      <tr class="bg-gray-50 text-gray-500 font-semibold">
+                        <th scope="col" class="py-1.5 px-2 border">วัสดุ / ดัชนีหักเห</th>
+                        <th scope="col" class="py-1.5 px-2 border">ความหนาขอบโดยประมาณ</th>
+                        <th scope="col" class="py-1.5 px-2 border">บางลงจาก 1.56</th>
+                        <th scope="col" class="py-1.5 px-2 border">Abbe (ความคลาดสี)</th>
+                        <th scope="col" class="py-1.5 px-2 border">น้ำหนักสัมพัทธ์</th>
+                      </tr>
+                    </thead>
+                    <tbody id="ai-material-body" class="bg-white"></tbody>
+                  </table>
+                </div>
+                <p class="text-2xs text-gray-400 leading-relaxed">
+                  ความหนาขอบคำนวณจากสูตร Sagitta (s = y²·|F| / 2000(n−1)) ที่เลนส์ดิบ 50 มม. ความหนากลาง 1.0 มม.
+                  เป็นค่าประมาณเพื่อการเปรียบเทียบ ค่าจริงขึ้นกับขนาดกรอบ ระยะเยื้องศูนย์ และผู้ผลิตเลนส์
+                </p>
+              </section>
+
+              <div class="p-4 border rounded-xl bg-slate-50/50 space-y-3">
+                <h3 class="font-bold text-gray-800 text-sm flex items-center space-x-1.5">
+                  <i class="fa-solid fa-comment-dollar text-emerald-500" aria-hidden="true"></i>
+                  <span>บทพูดแนะนำการขาย (Sales Script)</span>
+                </h3>
+                <div id="ai-sales-pitch" class="text-xs text-gray-600 leading-relaxed"></div>
+              </div>
+
+              <div id="ai-stock-match-wrap" class="hidden p-4 border rounded-xl bg-white space-y-2">
+                <h3 class="font-bold text-gray-800 text-sm flex items-center space-x-1.5">
+                  <i class="fa-solid fa-boxes-stacked text-blue-500" aria-hidden="true"></i>
+                  <span>สินค้าในคลังที่ตรงกับคำแนะนำ</span>
+                </h3>
+                <div id="ai-stock-match" class="text-xs text-gray-600 space-y-1"></div>
+              </div>
+
+              <div class="p-4 bg-amber-50/40 border border-amber-200 rounded-xl space-y-2">
+                <h3 class="font-bold text-amber-900 text-sm flex items-center space-x-1.5">
+                  <i class="fa-solid fa-triangle-exclamation text-amber-500" aria-hidden="true"></i>
+                  <span>ข้อควรระวัง &amp; แนวทางการประกอบแว่น</span>
+                </h3>
+                <p id="ai-extra-advice" class="text-xs text-amber-800 leading-relaxed"></p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <footer class="no-print bg-gray-100 border-t border-gray-200 py-6 mt-auto text-xs sm:text-sm text-gray-500">
+      <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 text-center sm:text-left">
+        <img src="logo.png" alt="" width="256" height="256" class="w-12 h-12 opacity-80 flex-shrink-0" decoding="async" loading="lazy">
+        <div>
+          <p class="font-semibold text-gray-700">ร้านแว่นตาดูดีการแว่น — เห็นชัด มั่นใจ ดูดี ทุกมุมมอง</p>
+          <p class="mt-0.5">ระบบบริหารจัดการร้านทัศนมาตรและการวัดสายตา · OptiCare Pro</p>
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <!-- ==================== MODALS ==================== -->
+
+  <!-- Modal: Customer -->
+  <div id="modal-customer" data-modal class="hidden fixed inset-0 z-[100] bg-black/50 flex items-center justify-center p-2 sm:p-4"
+       role="dialog" aria-modal="true" aria-labelledby="customer-modal-title">
+    <!-- แบ่งเป็น 3 ส่วน: หัวข้อ · เนื้อหาที่เลื่อนได้ · ปุ่มบันทึก — ฟอร์มยาวแค่ไหนก็ไม่ล้นจอ -->
+    <div class="modal-panel bg-white rounded-2xl max-w-3xl w-full shadow-2xl relative">
+      <div class="modal-head">
+        <div class="pr-10">
+          <h2 class="text-lg sm:text-xl font-bold text-gray-900" id="customer-modal-title">ลงทะเบียนลูกค้า &amp; ค่าสายตา</h2>
+          <p class="text-2xs text-gray-500 mt-0.5">บันทึกข้อมูลส่วนตัวและผลตรวจในหน้าต่างเดียว เลื่อนดูได้ทั้งหมด</p>
+        </div>
+        <button type="button" data-action="close-modal" aria-label="ปิดหน้าต่าง"
+                class="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
+          <i class="fa-solid fa-xmark text-xl" aria-hidden="true"></i>
+        </button>
+      </div>
+
+      <form id="customer-form" class="modal-form text-sm" novalidate>
+        <input type="hidden" id="cust-id">
+        <div class="modal-body space-y-6">
+
+        <fieldset class="space-y-3">
+          <legend class="font-semibold text-blue-800 border-b border-gray-200 pb-1 text-xs uppercase tracking-wider w-full">ข้อมูลทั่วไป</legend>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div>
+              <label for="cust-name" class="block text-xs font-medium text-gray-600 mb-1">ชื่อ-นามสกุล *</label>
+              <input type="text" id="cust-name" required autocomplete="name"
+                     class="w-full px-3 py-2 rounded-lg border focus:ring-1 focus:ring-blue-500 focus:outline-none">
+            </div>
+            <div>
+              <label for="cust-phone" class="block text-xs font-medium text-gray-600 mb-1">เบอร์โทรศัพท์ *</label>
+              <input type="tel" id="cust-phone" required inputmode="tel" autocomplete="tel" maxlength="20"
+                     class="w-full px-3 py-2 rounded-lg border focus:ring-1 focus:ring-blue-500 focus:outline-none">
+            </div>
+            <div>
+              <label for="cust-email" class="block text-xs font-medium text-gray-600 mb-1">อีเมล</label>
+              <input type="email" id="cust-email" autocomplete="email"
+                     class="w-full px-3 py-2 rounded-lg border focus:ring-1 focus:ring-blue-500 focus:outline-none">
+            </div>
+            <div>
+              <label for="cust-gender" class="block text-xs font-medium text-gray-600 mb-1">เพศ</label>
+              <select id="cust-gender" class="w-full px-3 py-2 rounded-lg border focus:ring-1 focus:ring-blue-500 focus:outline-none">
+                <option value="ชาย">ชาย</option>
+                <option value="หญิง">หญิง</option>
+                <option value="อื่นๆ">อื่นๆ</option>
+              </select>
+            </div>
+            <div>
+              <label for="cust-age" class="block text-xs font-medium text-gray-600 mb-1">อายุ (ปี)</label>
+              <input type="number" id="cust-age" min="0" max="120" step="1"
+                     class="w-full px-3 py-2 rounded-lg border focus:ring-1 focus:ring-blue-500 focus:outline-none">
+            </div>
+            <div>
+              <label for="cust-occupation" class="block text-xs font-medium text-gray-600 mb-1">อาชีพหลัก</label>
+              <input type="text" id="cust-occupation" placeholder="เช่น โปรแกรมเมอร์, พนักงานขับรถ"
+                     class="w-full px-3 py-2 rounded-lg border focus:ring-1 focus:ring-blue-500 focus:outline-none">
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset class="space-y-3">
+          <legend class="font-semibold text-blue-800 border-b border-gray-200 pb-1 text-xs uppercase tracking-wider w-full">
+            ประวัติสุขภาพตาและอาการสำคัญ (Ocular &amp; Medical History)
+          </legend>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div class="sm:col-span-2">
+              <label for="oc-chief-complaint" class="block text-xs font-medium text-gray-600 mb-1">อาการสำคัญที่มาพบ (Chief Complaint)</label>
+              <input type="text" id="oc-chief-complaint" maxlength="200"
+                     class="w-full px-3 py-2 rounded-lg border focus:ring-1 focus:ring-blue-500 focus:outline-none"
+                     placeholder="เช่น มองไกลไม่ชัด 3 เดือน ปวดศีรษะช่วงบ่าย">
+            </div>
+            <div>
+              <label for="oc-conditions" class="block text-xs font-medium text-gray-600 mb-1">โรคตา / โรคประจำตัว</label>
+              <input type="text" id="oc-conditions" maxlength="200"
+                     class="w-full px-3 py-2 rounded-lg border focus:ring-1 focus:ring-blue-500 focus:outline-none"
+                     placeholder="เช่น เบาหวาน ต้อหิน ตาแห้ง">
+            </div>
+            <div>
+              <label for="oc-medications" class="block text-xs font-medium text-gray-600 mb-1">ยาที่ใช้ประจำ</label>
+              <input type="text" id="oc-medications" maxlength="200"
+                     class="w-full px-3 py-2 rounded-lg border focus:ring-1 focus:ring-blue-500 focus:outline-none"
+                     placeholder="เช่น น้ำตาเทียม ยาหยอดลดความดันลูกตา">
+            </div>
+            <div>
+              <label for="oc-family" class="block text-xs font-medium text-gray-600 mb-1">ประวัติครอบครัว</label>
+              <input type="text" id="oc-family" maxlength="200"
+                     class="w-full px-3 py-2 rounded-lg border focus:ring-1 focus:ring-blue-500 focus:outline-none"
+                     placeholder="เช่น บิดามีต้อหิน มารดาสายตาสั้นสูง">
+            </div>
+            <div>
+              <label for="oc-contact-lens" class="block text-xs font-medium text-gray-600 mb-1">การใช้คอนแทคเลนส์</label>
+              <input type="text" id="oc-contact-lens" maxlength="200"
+                     class="w-full px-3 py-2 rounded-lg border focus:ring-1 focus:ring-blue-500 focus:outline-none"
+                     placeholder="เช่น รายวัน สัปดาห์ละ 3 วัน">
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset class="space-y-3">
+          <legend class="font-semibold text-blue-800 border-b border-gray-200 pb-1 text-xs uppercase tracking-wider w-full">
+            ข้อมูลการตรวจครั้งนี้ (Examination Record)
+          </legend>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div>
+              <label for="exam-date" class="block text-xs font-medium text-gray-600 mb-1">วันที่ตรวจ *</label>
+              <input type="date" id="exam-date" required
+                     class="w-full px-3 py-2 rounded-lg border focus:ring-1 focus:ring-blue-500 focus:outline-none">
+            </div>
+            <div>
+              <label for="exam-optometrist" class="block text-xs font-medium text-gray-600 mb-1">ผู้ตรวจ (ทัศนมาตร)</label>
+              <input type="text" id="exam-optometrist" maxlength="80"
+                     class="w-full px-3 py-2 rounded-lg border focus:ring-1 focus:ring-blue-500 focus:outline-none"
+                     placeholder="ชื่อผู้ทำการตรวจ">
+            </div>
+            <div>
+              <label for="exam-method" class="block text-xs font-medium text-gray-600 mb-1">วิธีการตรวจ</label>
+              <select id="exam-method" class="w-full px-3 py-2 rounded-lg border focus:ring-1 focus:ring-blue-500 focus:outline-none">
+                <option value="Subjective refraction">Subjective refraction</option>
+                <option value="Auto-refraction">Auto-refraction</option>
+                <option value="Retinoscopy">Retinoscopy</option>
+                <option value="ค่าจากแว่นเดิม (Lensometry)">ค่าจากแว่นเดิม (Lensometry)</option>
+              </select>
+            </div>
+          </div>
+          <div>
+            <label for="exam-note" class="block text-xs font-medium text-gray-600 mb-1">บันทึกผลการตรวจ</label>
+            <input type="text" id="exam-note" maxlength="200"
+                   class="w-full px-3 py-2 rounded-lg border focus:ring-1 focus:ring-blue-500 focus:outline-none"
+                   placeholder="เช่น เพิ่ม ADD ครั้งแรก / ค่าสายตาคงที่จากครั้งก่อน">
+          </div>
+
+          <div id="exam-mode-wrap" class="hidden bg-blue-50 border border-blue-200 rounded-lg p-3">
+            <label class="flex items-start gap-2 cursor-pointer">
+              <input type="checkbox" id="exam-as-new" class="rounded text-blue-600 mt-0.5" checked>
+              <span class="text-xs text-blue-900 leading-relaxed">
+                <strong>บันทึกเป็นการตรวจครั้งใหม่</strong> (เก็บผลการตรวจเดิมไว้ในแฟ้มประวัติ)<br>
+                <span class="text-2xs text-blue-700">ยกเลิกการเลือกนี้เฉพาะกรณีต้องการ “แก้ไขข้อผิดพลาด” ของผลตรวจล่าสุด ซึ่งจะเขียนทับข้อมูลเดิม</span>
+              </span>
+            </label>
+          </div>
+
+          <!-- แสดงแทน exam-mode-wrap เมื่อกดแก้ไขผลตรวจรายการใดรายการหนึ่งจากแฟ้มประวัติ -->
+          <div id="exam-edit-wrap" class="hidden bg-amber-50 border border-amber-300 rounded-lg p-3">
+            <input type="hidden" id="exam-editing-id">
+            <div class="flex items-start justify-between gap-3">
+              <p class="text-xs text-amber-900 leading-relaxed">
+                <i class="fa-solid fa-pen-to-square mr-1" aria-hidden="true"></i>
+                <strong>กำลังแก้ไขผลตรวจวันที่ <span id="exam-editing-date">—</span></strong><br>
+                <span class="text-2xs text-amber-800">กดบันทึกแล้วจะเขียนทับผลตรวจรายการนี้ ไม่ได้เพิ่มรายการใหม่</span>
+              </p>
+              <button type="button" data-action="cancel-exam-edit"
+                      class="shrink-0 px-2.5 py-1 border border-amber-300 bg-white text-amber-800 hover:bg-amber-100 rounded-lg text-2xs font-semibold transition">
+                ยกเลิกการแก้ไข
+              </button>
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset class="space-y-3">
+          <legend class="font-semibold text-blue-800 border-b border-gray-200 pb-1 text-xs uppercase tracking-wider w-full">
+            ค่าสายตามองไกล (Distance Rx)
+          </legend>
+          <div class="table-scroll">
+            <table class="w-full text-center border-collapse">
+              <caption class="sr-only">ตารางบันทึกค่าสายตามองไกล แยกตาขวาและตาซ้าย</caption>
+              <thead>
+                <tr class="bg-gray-50 text-xs font-semibold text-gray-500">
+                  <th scope="col" class="py-2 border">ข้างตา</th>
+                  <th scope="col" class="py-2 border">Sphere (SPH)</th>
+                  <th scope="col" class="py-2 border">Cylinder (CYL)</th>
+                  <th scope="col" class="py-2 border">Axis (AX)</th>
+                  <th scope="col" class="py-2 border">VA มองไกล</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y text-xs">
+                <tr>
+                  <th scope="row" class="py-2 font-bold bg-gray-50 border">OD (ตาขวา)</th>
+                  <td class="p-1 border">
+                    <label class="sr-only" for="ref-od-sph">Sphere มองไกล ตาขวา</label>
+                    <input type="number" step="0.25" min="-30" max="30" id="ref-od-sph" data-recalc-near class="w-20 px-1 py-1 text-center border rounded">
+                  </td>
+                  <td class="p-1 border">
+                    <label class="sr-only" for="ref-od-cyl">Cylinder ตาขวา</label>
+                    <input type="number" step="0.25" min="-10" max="10" id="ref-od-cyl" class="w-20 px-1 py-1 text-center border rounded">
+                  </td>
+                  <td class="p-1 border">
+                    <label class="sr-only" for="ref-od-ax">Axis ตาขวา</label>
+                    <input type="number" step="1" min="0" max="180" id="ref-od-ax" class="w-20 px-1 py-1 text-center border rounded">
+                  </td>
+                  <td class="p-1 border">
+                    <label class="sr-only" for="ref-od-va">VA มองไกล ตาขวา</label>
+                    <input type="text" id="ref-od-va" maxlength="10" class="w-20 px-1 py-1 text-center border rounded" placeholder="6/6">
+                  </td>
+                </tr>
+                <tr>
+                  <th scope="row" class="py-2 font-bold bg-gray-50 border">OS (ตาซ้าย)</th>
+                  <td class="p-1 border">
+                    <label class="sr-only" for="ref-os-sph">Sphere มองไกล ตาซ้าย</label>
+                    <input type="number" step="0.25" min="-30" max="30" id="ref-os-sph" data-recalc-near class="w-20 px-1 py-1 text-center border rounded">
+                  </td>
+                  <td class="p-1 border">
+                    <label class="sr-only" for="ref-os-cyl">Cylinder ตาซ้าย</label>
+                    <input type="number" step="0.25" min="-10" max="10" id="ref-os-cyl" class="w-20 px-1 py-1 text-center border rounded">
+                  </td>
+                  <td class="p-1 border">
+                    <label class="sr-only" for="ref-os-ax">Axis ตาซ้าย</label>
+                    <input type="number" step="1" min="0" max="180" id="ref-os-ax" class="w-20 px-1 py-1 text-center border rounded">
+                  </td>
+                  <td class="p-1 border">
+                    <label class="sr-only" for="ref-os-va">VA มองไกล ตาซ้าย</label>
+                    <input type="text" id="ref-os-va" maxlength="10" class="w-20 px-1 py-1 text-center border rounded" placeholder="6/6">
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="text-2xs text-gray-400">* บันทึกค่า CYL ตามหลัก Minus Cylinder (ค่าติดลบ) และ AX ระหว่าง 0–180 องศา</p>
+        </fieldset>
+
+        <fieldset class="space-y-3">
+          <legend class="font-semibold text-blue-800 border-b border-gray-200 pb-1 text-xs uppercase tracking-wider w-full">
+            ค่าสายตามองใกล้ (Near Rx / Addition)
+          </legend>
+          <div class="table-scroll">
+            <table class="w-full text-center border-collapse">
+              <caption class="sr-only">ตารางบันทึกค่าสายตามองใกล้และค่า Addition</caption>
+              <thead>
+                <tr class="bg-gray-50 text-xs font-semibold text-gray-500">
+                  <th scope="col" class="py-2 border">ข้างตา</th>
+                  <th scope="col" class="py-2 border">Addition (ADD)</th>
+                  <th scope="col" class="py-2 border">Near SPH</th>
+                  <th scope="col" class="py-2 border">VA มองใกล้</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y text-xs">
+                <tr>
+                  <th scope="row" class="py-2 font-bold bg-gray-50 border">OD (ตาขวา)</th>
+                  <td class="p-1 border">
+                    <label class="sr-only" for="ref-od-add">Addition ตาขวา</label>
+                    <input type="number" step="0.25" min="0" max="4" id="ref-od-add" data-recalc-near class="w-20 px-1 py-1 text-center border rounded" placeholder="+1.50">
+                  </td>
+                  <td class="p-1 border">
+                    <label class="sr-only" for="ref-od-near-sph">Sphere มองใกล้ ตาขวา</label>
+                    <input type="number" step="0.25" min="-30" max="30" id="ref-od-near-sph" class="w-20 px-1 py-1 text-center border rounded bg-gray-50" placeholder="อัตโนมัติ">
+                  </td>
+                  <td class="p-1 border">
+                    <label class="sr-only" for="ref-od-near-va">VA มองใกล้ ตาขวา</label>
+                    <input type="text" id="ref-od-near-va" maxlength="10" class="w-20 px-1 py-1 text-center border rounded" placeholder="N5">
+                  </td>
+                </tr>
+                <tr>
+                  <th scope="row" class="py-2 font-bold bg-gray-50 border">OS (ตาซ้าย)</th>
+                  <td class="p-1 border">
+                    <label class="sr-only" for="ref-os-add">Addition ตาซ้าย</label>
+                    <input type="number" step="0.25" min="0" max="4" id="ref-os-add" data-recalc-near class="w-20 px-1 py-1 text-center border rounded" placeholder="+1.50">
+                  </td>
+                  <td class="p-1 border">
+                    <label class="sr-only" for="ref-os-near-sph">Sphere มองใกล้ ตาซ้าย</label>
+                    <input type="number" step="0.25" min="-30" max="30" id="ref-os-near-sph" class="w-20 px-1 py-1 text-center border rounded bg-gray-50" placeholder="อัตโนมัติ">
+                  </td>
+                  <td class="p-1 border">
+                    <label class="sr-only" for="ref-os-near-va">VA มองใกล้ ตาซ้าย</label>
+                    <input type="text" id="ref-os-near-va" maxlength="10" class="w-20 px-1 py-1 text-center border rounded" placeholder="N5">
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="text-2xs text-gray-400">
+            * Near SPH คำนวณอัตโนมัติจาก (Distance SPH + ADD) และแก้ไขทับได้ · ค่า CYL/AXIS มองใกล้ใช้ค่าเดียวกับมองไกลตามหลักปฏิบัติทั่วไป
+          </p>
+
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-1">
+            <div>
+              <label for="ref-pd-far" class="block text-xs font-medium text-gray-600 mb-1">PD มองไกล (มม.)</label>
+              <input type="number" step="0.5" min="40" max="85" id="ref-pd-far"
+                     class="w-full px-3 py-2 rounded-lg border focus:ring-1 focus:ring-blue-500 focus:outline-none" placeholder="64">
+            </div>
+            <div>
+              <label for="ref-pd-near" class="block text-xs font-medium text-gray-600 mb-1">PD มองใกล้ (มม.)</label>
+              <input type="number" step="0.5" min="35" max="85" id="ref-pd-near"
+                     class="w-full px-3 py-2 rounded-lg border focus:ring-1 focus:ring-blue-500 focus:outline-none" placeholder="61">
+            </div>
+            <div>
+              <label for="ref-seg-height" class="block text-xs font-medium text-gray-600 mb-1">Segment Height (มม.)</label>
+              <input type="number" step="0.5" min="10" max="40" id="ref-seg-height"
+                     class="w-full px-3 py-2 rounded-lg border focus:ring-1 focus:ring-blue-500 focus:outline-none" placeholder="22">
+            </div>
+            <div>
+              <label for="cust-face-shape" class="block text-xs font-medium text-gray-600 mb-1">รูปหน้าลูกค้า</label>
+              <select id="cust-face-shape" class="w-full px-3 py-2 rounded-lg border focus:ring-1 focus:ring-blue-500 focus:outline-none">
+                <option value="">ไม่ระบุ</option>
+                <option value="กลม">กลม (Round)</option>
+                <option value="รูปไข่">รูปไข่ (Oval)</option>
+                <option value="เหลี่ยม">เหลี่ยม (Square)</option>
+                <option value="สี่เหลี่ยมผืนผ้า">ยาว/สี่เหลี่ยมผืนผ้า (Oblong)</option>
+                <option value="หัวใจ">หัวใจ (Heart)</option>
+                <option value="สามเหลี่ยม">สามเหลี่ยม (Triangle)</option>
+                <option value="เพชร">เพชร (Diamond)</option>
+              </select>
+            </div>
+          </div>
+        </fieldset>
+
+        <!-- ค่าที่คำนวณอัตโนมัติจากค่าสายตาที่กรอก -->
+        <section aria-labelledby="rx-computed-heading" class="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-3">
+          <h3 id="rx-computed-heading" class="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-2">
+            <i class="fa-solid fa-calculator text-slate-500" aria-hidden="true"></i>
+            ค่าที่คำนวณได้ตามหลักทัศนมาตรศาสตร์
+          </h3>
+          <div class="table-scroll">
+            <table class="w-full text-center border-collapse text-2xs">
+              <caption class="sr-only">ค่าที่คำนวณอัตโนมัติจากค่าสายตาที่กรอก</caption>
+              <thead>
+                <tr class="text-gray-500 font-semibold">
+                  <th scope="col" class="py-1.5 px-2 border border-slate-200 bg-white">ข้างตา</th>
+                  <th scope="col" class="py-1.5 px-2 border border-slate-200 bg-white">Spherical Equivalent</th>
+                  <th scope="col" class="py-1.5 px-2 border border-slate-200 bg-white">ชนิดสายตาเอียง</th>
+                  <th scope="col" class="py-1.5 px-2 border border-slate-200 bg-white">Plus-Cylinder Form</th>
+                  <th scope="col" class="py-1.5 px-2 border border-slate-200 bg-white">Near Rx</th>
+                  <th scope="col" class="py-1.5 px-2 border border-slate-200 bg-white">VA (LogMAR)</th>
+                </tr>
+              </thead>
+              <tbody id="rx-computed-body" class="bg-white"></tbody>
+            </table>
+          </div>
+          <p id="rx-computed-summary" class="text-2xs text-slate-600"></p>
+          <div id="rx-computed-flags" class="space-y-1.5"></div>
+        </section>
+
+        <div class="space-y-2">
+          <label for="cust-notes" class="block text-xs font-medium text-gray-600">บันทึกเพิ่มเติมเกี่ยวกับการใช้สายตา</label>
+          <textarea id="cust-notes" rows="2" maxlength="500"
+                    class="w-full p-2 border rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    placeholder="เช่น ล้าตาตอนเย็น สู้แสงไม่ได้ ทำงานหน้าจอวันละ 8 ชั่วโมง"></textarea>
+        </div>
+
+        <!-- แฟ้มประวัติการตรวจย้อนหลัง -->
+        <section id="exam-history-wrap" class="hidden space-y-2" aria-labelledby="exam-history-heading">
+          <h3 id="exam-history-heading" class="font-semibold text-blue-800 border-b border-gray-200 pb-1 text-xs uppercase tracking-wider">
+            แฟ้มประวัติการตรวจย้อนหลัง (Longitudinal Record)
+          </h3>
+          <div class="table-scroll">
+            <table class="w-full text-left border-collapse text-2xs">
+              <caption class="sr-only">ประวัติการตรวจวัดสายตาย้อนหลังของผู้รับบริการรายนี้</caption>
+              <thead>
+                <tr class="bg-gray-50 text-gray-500 font-semibold">
+                  <th scope="col" class="py-2 px-2 border">วันที่ตรวจ</th>
+                  <th scope="col" class="py-2 px-2 border">OD (SPH/CYL×AX)</th>
+                  <th scope="col" class="py-2 px-2 border">OS (SPH/CYL×AX)</th>
+                  <th scope="col" class="py-2 px-2 border text-center">ADD</th>
+                  <th scope="col" class="py-2 px-2 border text-center">SE เฉลี่ย</th>
+                  <th scope="col" class="py-2 px-2 border">ผู้ตรวจ / บันทึก</th>
+                  <th scope="col" class="py-2 px-2 border text-center whitespace-nowrap">จัดการ</th>
+                </tr>
+              </thead>
+              <tbody id="exam-history" class="divide-y divide-gray-100"></tbody>
+            </table>
+          </div>
+          <p id="exam-progression" class="text-2xs"></p>
+        </section>
+        </div>
+
+        <div class="modal-foot flex flex-wrap justify-end gap-3">
+          <button type="button" data-action="delete-customer-from-form" id="btn-delete-customer"
+                  class="hidden mr-auto px-4 py-2 border border-rose-200 text-rose-600 hover:bg-rose-50 rounded-lg font-semibold text-xs transition items-center gap-1.5">
+            <i class="fa-solid fa-trash-can" aria-hidden="true"></i>
+            <span>ลบผู้รับบริการนี้</span>
+          </button>
+          <button type="button" data-action="close-modal" class="px-4 py-2 border rounded-lg text-gray-600 hover:bg-gray-50">ยกเลิก</button>
+          <button type="submit" class="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg shadow">บันทึกข้อมูล</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Product -->
+  <div id="modal-product" data-modal class="hidden fixed inset-0 z-[100] bg-black/50 flex items-center justify-center p-2 sm:p-4"
+       role="dialog" aria-modal="true" aria-labelledby="product-modal-title">
+    <div class="modal-panel bg-white rounded-2xl max-w-md w-full shadow-2xl relative">
+      <div class="modal-head">
+        <h2 class="text-lg sm:text-xl font-bold text-gray-900 pr-10" id="product-modal-title">เพิ่มสินค้าเข้าคลัง</h2>
+        <button type="button" data-action="close-modal" aria-label="ปิดหน้าต่าง"
+                class="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
+          <i class="fa-solid fa-xmark text-xl" aria-hidden="true"></i>
+        </button>
+      </div>
+
+      <form id="product-form" class="modal-form text-sm" novalidate>
+        <div class="modal-body space-y-4">
+        <input type="hidden" id="prod-id">
+        <div>
+          <label for="prod-category" class="block text-xs font-medium text-gray-600 mb-1">หมวดหมู่สินค้า *</label>
+          <select id="prod-category" required class="w-full px-3 py-2 rounded-lg border focus:ring-1 focus:ring-blue-500 focus:outline-none">
+            <option value="Frame">กรอบแว่น (Frame)</option>
+            <option value="Lens">เลนส์สายตา (Lens)</option>
+            <option value="ContactLens">คอนแทคเลนส์ (Contact Lens)</option>
+            <option value="Accessory">น้ำยา &amp; อุปกรณ์เสริม (Accessory)</option>
+          </select>
+        </div>
+        <div>
+          <label for="prod-name" class="block text-xs font-medium text-gray-600 mb-1">ชื่อสินค้า / แบรนด์ / รุ่น *</label>
+          <input type="text" id="prod-name" required placeholder="เช่น Ray-Ban Clubmaster RB3016"
+                 class="w-full px-3 py-2 rounded-lg border focus:ring-1 focus:ring-blue-500 focus:outline-none">
+        </div>
+        <div>
+          <label for="prod-barcode" class="block text-xs font-medium text-gray-600 mb-1">บาร์โค้ด / รหัสอ้างอิง</label>
+          <input type="text" id="prod-barcode" placeholder="บาร์โค้ดสินค้า หรือรหัสที่กำหนดเอง"
+                 class="w-full px-3 py-2 rounded-lg border focus:ring-1 focus:ring-blue-500 focus:outline-none">
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label for="prod-cost" class="block text-xs font-medium text-gray-600 mb-1">ราคาต้นทุน (บาท)</label>
+            <input type="number" id="prod-cost" min="0" step="1" value="0"
+                   class="w-full px-3 py-2 rounded-lg border focus:ring-1 focus:ring-blue-500 focus:outline-none">
+          </div>
+          <div>
+            <label for="prod-price" class="block text-xs font-medium text-gray-600 mb-1">ราคาขายหน้าร้าน * (บาท)</label>
+            <input type="number" id="prod-price" required min="0" step="1"
+                   class="w-full px-3 py-2 rounded-lg border focus:ring-1 focus:ring-blue-500 focus:outline-none">
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label for="prod-stock" class="block text-xs font-medium text-gray-600 mb-1">จำนวนคงเหลือ *</label>
+            <input type="number" id="prod-stock" required min="0" step="1"
+                   class="w-full px-3 py-2 rounded-lg border focus:ring-1 focus:ring-blue-500 focus:outline-none">
+          </div>
+          <div>
+            <label for="prod-min-alert" class="block text-xs font-medium text-gray-600 mb-1">แจ้งเตือนเมื่อเหลือต่ำกว่า</label>
+            <input type="number" id="prod-min-alert" min="0" step="1" value="3"
+                   class="w-full px-3 py-2 rounded-lg border focus:ring-1 focus:ring-blue-500 focus:outline-none">
+          </div>
+        </div>
+        </div>
+
+        <div class="modal-foot flex justify-end gap-3">
+          <button type="button" data-action="close-modal" class="px-4 py-2 border rounded-lg text-gray-600 hover:bg-gray-50">ยกเลิก</button>
+          <button type="submit" class="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg shadow">บันทึกสินค้า</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Order -->
+  <div id="modal-order" data-modal class="hidden fixed inset-0 z-[100] bg-black/50 flex items-center justify-center p-2 sm:p-4"
+       role="dialog" aria-modal="true" aria-labelledby="order-modal-title">
+    <div class="modal-panel bg-white rounded-2xl max-w-2xl w-full shadow-2xl relative">
+      <div class="modal-head">
+        <h2 class="text-lg sm:text-xl font-bold text-gray-900 pr-10" id="order-modal-title">เปิดบิลขาย / สั่งตัดแว่นตา</h2>
+        <button type="button" data-action="close-modal" aria-label="ปิดหน้าต่าง"
+                class="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
+          <i class="fa-solid fa-xmark text-xl" aria-hidden="true"></i>
+        </button>
+      </div>
+
+      <form id="order-form" class="modal-form text-sm" novalidate>
+        <div class="modal-body space-y-4">
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div class="sm:col-span-2">
+            <label for="ord-customer" class="block text-xs font-medium text-gray-600 mb-1">ผู้รับบริการ *</label>
+            <select id="ord-customer" required class="w-full px-3 py-2 rounded-lg border focus:ring-1 focus:ring-blue-500 focus:outline-none"></select>
+          </div>
+          <div>
+            <label for="ord-promise-date" class="block text-xs font-medium text-gray-600 mb-1">วันนัดรับ</label>
+            <input type="date" id="ord-promise-date"
+                   class="w-full px-3 py-2 rounded-lg border focus:ring-1 focus:ring-blue-500 focus:outline-none">
+          </div>
+        </div>
+
+        <!-- สำเนาค่าสายตาที่ใช้สั่งตัด -->
+        <section aria-labelledby="ord-rx-heading" class="bg-blue-50 border border-blue-200 rounded-xl p-3 space-y-2">
+          <div class="flex items-center justify-between gap-2">
+            <h3 id="ord-rx-heading" class="text-xs font-bold text-blue-900 uppercase tracking-wider flex items-center gap-1.5">
+              <i class="fa-solid fa-file-prescription" aria-hidden="true"></i>
+              ค่าสายตาที่ใช้สั่งตัด (Prescription)
+            </h3>
+            <span class="text-2xs text-blue-700" id="ord-rx-date">—</span>
+          </div>
+          <div id="ord-rx-panel" class="text-2xs text-blue-900">
+            เลือกผู้รับบริการเพื่อดึงค่าสายตาล่าสุด
+          </div>
+          <p class="text-2xs text-blue-700 leading-relaxed">
+            ระบบจะบันทึกสำเนาค่าสายตานี้ติดไปกับออเดอร์ หากผู้รับบริการมาตรวจใหม่ภายหลัง ค่าในใบสั่งนี้จะไม่เปลี่ยนตาม
+          </p>
+        </section>
+
+        <div class="border-t border-gray-100 pt-3">
+          <h3 class="font-semibold text-gray-700 mb-2">เลือกกรอบแว่นและเลนส์</h3>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label for="ord-frame" class="block text-xs font-medium text-gray-500 mb-1">กรอบแว่น</label>
+              <select id="ord-frame" class="w-full px-3 py-2 rounded-lg border focus:ring-1 focus:ring-blue-500 focus:outline-none"></select>
+            </div>
+            <div>
+              <label for="ord-lens" class="block text-xs font-medium text-gray-500 mb-1">เลนส์สายตาที่สั่งตัด</label>
+              <select id="ord-lens" class="w-full px-3 py-2 rounded-lg border focus:ring-1 focus:ring-blue-500 focus:outline-none"></select>
+            </div>
+          </div>
+        </div>
+
+        <!-- ใบสั่งงานแล็บ -->
+        <details id="lab-details" class="border border-gray-200 rounded-xl overflow-hidden">
+          <summary class="px-4 py-3 bg-gray-50 cursor-pointer font-semibold text-gray-700 text-xs uppercase tracking-wider flex items-center gap-2">
+            <i class="fa-solid fa-ruler-combined text-blue-600" aria-hidden="true"></i>
+            พารามิเตอร์ใบสั่งงานแล็บ (Lab Work Order)
+          </summary>
+
+          <div class="p-4 space-y-4">
+            <div class="grid grid-cols-2 sm:grid-cols-5 gap-3">
+              <div class="col-span-2 sm:col-span-1">
+                <label for="lab-frame-type" class="block text-2xs font-medium text-gray-600 mb-1">ชนิดกรอบ</label>
+                <select id="lab-frame-type" class="w-full px-2 py-1.5 rounded-lg border text-xs focus:ring-1 focus:ring-blue-500 focus:outline-none">
+                  <option value="เต็มกรอบ (Full rim)">เต็มกรอบ (Full rim)</option>
+                  <option value="กรอบเซาะร่อง (Semi-rimless)">กรอบเซาะร่อง (Semi-rimless)</option>
+                  <option value="กรอบเจาะ (Rimless)">กรอบเจาะ (Rimless)</option>
+                </select>
+              </div>
+              <div>
+                <label for="lab-a" class="block text-2xs font-medium text-gray-600 mb-1">A (กว้างเลนส์)</label>
+                <input type="number" id="lab-a" step="0.5" min="30" max="70" placeholder="52"
+                       class="w-full px-2 py-1.5 rounded-lg border text-xs focus:ring-1 focus:ring-blue-500 focus:outline-none">
+              </div>
+              <div>
+                <label for="lab-b" class="block text-2xs font-medium text-gray-600 mb-1">B (สูงเลนส์)</label>
+                <input type="number" id="lab-b" step="0.5" min="20" max="60" placeholder="38"
+                       class="w-full px-2 py-1.5 rounded-lg border text-xs focus:ring-1 focus:ring-blue-500 focus:outline-none">
+              </div>
+              <div>
+                <label for="lab-dbl" class="block text-2xs font-medium text-gray-600 mb-1">DBL (สะพานจมูก)</label>
+                <input type="number" id="lab-dbl" step="0.5" min="10" max="30" placeholder="20"
+                       class="w-full px-2 py-1.5 rounded-lg border text-xs focus:ring-1 focus:ring-blue-500 focus:outline-none">
+              </div>
+              <div>
+                <label for="lab-ed" class="block text-2xs font-medium text-gray-600 mb-1">ED (เส้นทแยงยาวสุด)</label>
+                <input type="number" id="lab-ed" step="0.5" min="30" max="80" placeholder="55"
+                       class="w-full px-2 py-1.5 rounded-lg border text-xs focus:ring-1 focus:ring-blue-500 focus:outline-none">
+              </div>
+            </div>
+
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 border-t border-gray-100 pt-3">
+              <div>
+                <label for="lab-mono-pd-od" class="block text-2xs font-medium text-gray-600 mb-1">Mono PD ขวา (มม.)</label>
+                <input type="number" id="lab-mono-pd-od" step="0.5" min="20" max="45" placeholder="32"
+                       class="w-full px-2 py-1.5 rounded-lg border text-xs focus:ring-1 focus:ring-blue-500 focus:outline-none">
+              </div>
+              <div>
+                <label for="lab-mono-pd-os" class="block text-2xs font-medium text-gray-600 mb-1">Mono PD ซ้าย (มม.)</label>
+                <input type="number" id="lab-mono-pd-os" step="0.5" min="20" max="45" placeholder="32"
+                       class="w-full px-2 py-1.5 rounded-lg border text-xs focus:ring-1 focus:ring-blue-500 focus:outline-none">
+              </div>
+              <div>
+                <label for="lab-fh-od" class="block text-2xs font-medium text-gray-600 mb-1">Fitting Height ขวา</label>
+                <input type="number" id="lab-fh-od" step="0.5" min="8" max="40" placeholder="22"
+                       class="w-full px-2 py-1.5 rounded-lg border text-xs focus:ring-1 focus:ring-blue-500 focus:outline-none">
+              </div>
+              <div>
+                <label for="lab-fh-os" class="block text-2xs font-medium text-gray-600 mb-1">Fitting Height ซ้าย</label>
+                <input type="number" id="lab-fh-os" step="0.5" min="8" max="40" placeholder="22"
+                       class="w-full px-2 py-1.5 rounded-lg border text-xs focus:ring-1 focus:ring-blue-500 focus:outline-none">
+              </div>
+            </div>
+
+            <div class="grid grid-cols-3 gap-3 border-t border-gray-100 pt-3">
+              <div>
+                <label for="lab-panto" class="block text-2xs font-medium text-gray-600 mb-1">Pantoscopic Tilt (°)</label>
+                <input type="number" id="lab-panto" step="1" min="0" max="20" placeholder="8"
+                       class="w-full px-2 py-1.5 rounded-lg border text-xs focus:ring-1 focus:ring-blue-500 focus:outline-none">
+              </div>
+              <div>
+                <label for="lab-vertex" class="block text-2xs font-medium text-gray-600 mb-1">Vertex Distance (มม.)</label>
+                <input type="number" id="lab-vertex" step="0.5" min="5" max="20" placeholder="12"
+                       class="w-full px-2 py-1.5 rounded-lg border text-xs focus:ring-1 focus:ring-blue-500 focus:outline-none">
+              </div>
+              <div>
+                <label for="lab-wrap" class="block text-2xs font-medium text-gray-600 mb-1">Face Form / Wrap (°)</label>
+                <input type="number" id="lab-wrap" step="1" min="0" max="30" placeholder="5"
+                       class="w-full px-2 py-1.5 rounded-lg border text-xs focus:ring-1 focus:ring-blue-500 focus:outline-none">
+              </div>
+            </div>
+
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 border-t border-gray-100 pt-3">
+              <div>
+                <label for="lab-index" class="block text-2xs font-medium text-gray-600 mb-1">ดัชนีหักเห</label>
+                <select id="lab-index" class="w-full px-2 py-1.5 rounded-lg border text-xs focus:ring-1 focus:ring-blue-500 focus:outline-none">
+                  <option value="0">ไม่ระบุ</option>
+                  <option value="1.50">1.50 (CR-39)</option>
+                  <option value="1.56">1.56</option>
+                  <option value="1.59">1.59 (Polycarbonate)</option>
+                  <option value="1.60">1.60</option>
+                  <option value="1.67">1.67</option>
+                  <option value="1.74">1.74</option>
+                </select>
+              </div>
+              <div>
+                <label for="lab-coating" class="block text-2xs font-medium text-gray-600 mb-1">โค้ทติ้ง</label>
+                <input type="text" id="lab-coating" maxlength="80" placeholder="Multicoat / Blue Control"
+                       class="w-full px-2 py-1.5 rounded-lg border text-xs focus:ring-1 focus:ring-blue-500 focus:outline-none">
+              </div>
+              <div>
+                <label for="lab-tint" class="block text-2xs font-medium text-gray-600 mb-1">สี / Tint</label>
+                <input type="text" id="lab-tint" maxlength="80" placeholder="ไม่ย้อมสี"
+                       class="w-full px-2 py-1.5 rounded-lg border text-xs focus:ring-1 focus:ring-blue-500 focus:outline-none">
+              </div>
+              <div>
+                <label for="lab-edge" class="block text-2xs font-medium text-gray-600 mb-1">การเจียร์ขอบ</label>
+                <select id="lab-edge" class="w-full px-2 py-1.5 rounded-lg border text-xs focus:ring-1 focus:ring-blue-500 focus:outline-none">
+                  <option value="เจียร์ปกติ (Standard bevel)">เจียร์ปกติ (Standard bevel)</option>
+                  <option value="เซาะร่อง (Groove)">เซาะร่อง (Groove)</option>
+                  <option value="เจาะรู (Drill mount)">เจาะรู (Drill mount)</option>
+                  <option value="ขัดขอบเงา (Polish)">ขัดขอบเงา (Polish)</option>
+                  <option value="ลบเหลี่ยมขอบ (Roll &amp; polish)">ลบเหลี่ยมขอบ (Roll &amp; polish)</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- ค่าที่คำนวณจากพารามิเตอร์ข้างต้น -->
+            <div class="bg-slate-50 border border-slate-200 rounded-lg p-3 space-y-2">
+              <h4 class="text-2xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
+                <i class="fa-solid fa-calculator text-slate-500" aria-hidden="true"></i>
+                ค่าที่คำนวณสำหรับสั่งเลนส์ดิบ
+              </h4>
+              <div id="lab-computed" class="text-2xs text-slate-700"></div>
+            </div>
+          </div>
+        </details>
+
+        <div class="border-t border-gray-100 pt-3">
+          <label for="ord-lab-instruction" class="block text-xs font-medium text-gray-600 mb-1">คำสั่งเพิ่มเติมถึงห้องแล็บ</label>
+          <textarea id="ord-lab-instruction" rows="2" maxlength="500"
+                    class="w-full p-2 border rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    placeholder="เช่น ตรวจสอบแกนเอียงก่อนเจียร์ ลบเหลี่ยมขอบด้านจมูก หรือคำสั่งเฉพาะจากทัศนมาตร"></textarea>
+        </div>
+
+        <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 border-t border-gray-100 pt-3">
+          <div>
+            <label for="ord-total-raw" class="block text-xs font-medium text-gray-500 mb-1">ราคารวมปกติ</label>
+            <input type="number" id="ord-total-raw" readonly value="0"
+                   class="w-full px-3 py-2 rounded-lg border bg-gray-50 text-gray-500 font-bold">
+          </div>
+          <div>
+            <label for="ord-discount" class="block text-xs font-medium text-gray-500 mb-1">ส่วนลดพิเศษ</label>
+            <input type="number" id="ord-discount" min="0" step="1" value="0"
+                   class="w-full px-3 py-2 rounded-lg border focus:ring-1 focus:ring-blue-500 focus:outline-none">
+          </div>
+          <div>
+            <label for="ord-total-final" class="block text-xs font-medium text-gray-500 mb-1">ยอดสุทธิ</label>
+            <input type="number" id="ord-total-final" readonly value="0"
+                   class="w-full px-3 py-2 rounded-lg border bg-emerald-50 text-emerald-700 font-extrabold text-base">
+          </div>
+          <div>
+            <label for="ord-payment" class="block text-xs font-medium text-gray-500 mb-1">ชำระเงินโดย</label>
+            <select id="ord-payment" class="w-full px-3 py-2 rounded-lg border focus:ring-1 focus:ring-blue-500 focus:outline-none">
+              <option value="เงินสด">เงินสด</option>
+              <option value="โอนเงินผ่านธนาคาร">โอนเงินผ่านธนาคาร</option>
+              <option value="บัตรเครดิต">บัตรเครดิต</option>
+              <option value="ผ่อนชำระ 0%">ผ่อนชำระ 0%</option>
+            </select>
+          </div>
+          <div>
+            <label for="ord-deposit" class="block text-xs font-medium text-gray-500 mb-1">เงินมัดจำ</label>
+            <input type="number" id="ord-deposit" min="0" step="1" value="0"
+                   class="w-full px-3 py-2 rounded-lg border focus:ring-1 focus:ring-blue-500 focus:outline-none">
+          </div>
+          <div>
+            <label for="ord-balance" class="block text-xs font-medium text-gray-500 mb-1">คงเหลือชำระวันรับ</label>
+            <input type="number" id="ord-balance" readonly value="0"
+                   class="w-full px-3 py-2 rounded-lg border bg-amber-50 text-amber-700 font-bold">
+          </div>
+        </div>
+        </div>
+
+        <div class="modal-foot flex justify-end gap-3">
+          <button type="button" data-action="close-modal" class="px-4 py-2 border rounded-lg text-gray-600 hover:bg-gray-50">ยกเลิก</button>
+          <button type="submit" class="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-lg shadow">บันทึกและเปิดบิล</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Confirm -->
+  <div id="confirm-modal" data-modal class="hidden fixed inset-0 z-[400] bg-black/50 overflow-y-auto flex items-center justify-center p-4"
+       role="alertdialog" aria-modal="true" aria-labelledby="confirm-title" aria-describedby="confirm-message">
+    <div class="bg-white rounded-2xl max-w-sm w-full p-6 shadow-2xl relative text-sm">
+      <button type="button" data-action="close-modal" aria-label="ปิดหน้าต่าง"
+              class="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
+        <i class="fa-solid fa-xmark text-lg" aria-hidden="true"></i>
+      </button>
+      <div class="text-center space-y-4">
+        <div id="confirm-icon" class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-emerald-100 text-emerald-600 mt-2">
+          <i class="fa-solid fa-floppy-disk text-xl" aria-hidden="true"></i>
+        </div>
+        <h2 class="text-lg font-bold text-gray-900" id="confirm-title">ยืนยันการบันทึกข้อมูล</h2>
+        <p class="text-xs text-gray-500 leading-relaxed" id="confirm-message">คุณแน่ใจหรือไม่ว่าต้องการดำเนินการนี้?</p>
+      </div>
+      <div class="flex space-x-3 mt-6">
+        <button type="button" data-action="close-modal" data-autofocus
+                class="flex-1 py-2.5 border border-gray-200 rounded-xl text-xs font-semibold text-gray-600 hover:bg-gray-50 transition">ยกเลิก</button>
+        <button type="button" id="confirm-submit-btn"
+                class="flex-1 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-semibold shadow-md transition">ยืนยัน</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: จัดการผู้ใช้ระบบ -->
+  <div id="modal-users" data-modal class="hidden fixed inset-0 z-[150] bg-black/50 overflow-y-auto flex items-start justify-center p-4"
+       role="dialog" aria-modal="true" aria-labelledby="users-modal-title">
+    <div class="bg-white rounded-2xl max-w-2xl w-full p-6 shadow-2xl relative my-8">
+      <button type="button" data-action="close-modal" aria-label="ปิดหน้าต่าง"
+              class="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
+        <i class="fa-solid fa-xmark text-xl" aria-hidden="true"></i>
+      </button>
+      <h2 class="text-xl font-bold text-gray-900 mb-1" id="users-modal-title">ผู้ใช้ระบบและสิทธิ์</h2>
+      <p class="text-xs text-gray-500 mb-4">
+        สิทธิ์ทั้งหมดถูกบังคับใช้ที่ฝั่งเซิร์ฟเวอร์ การซ่อนปุ่มในหน้าเว็บเป็นเพียงการช่วยให้ใช้งานง่ายขึ้นเท่านั้น
+      </p>
+
+      <div id="users-list" class="space-y-2 mb-4"></div>
+
+      <form id="user-form" class="border-t border-gray-100 pt-4 space-y-3" novalidate>
+        <h3 class="text-xs font-bold text-gray-700 uppercase tracking-wider">เพิ่ม / แก้ไขผู้ใช้</h3>
+        <input type="hidden" id="user-id">
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div>
+            <label for="user-username" class="block text-xs font-medium text-gray-600 mb-1">ชื่อผู้ใช้ *</label>
+            <input type="text" id="user-username" required autocomplete="off" maxlength="32"
+                   autocapitalize="none" autocorrect="off" spellcheck="false"
+                   class="w-full px-3 py-2 rounded-lg border text-xs focus:ring-1 focus:ring-blue-500 focus:outline-none"
+                   placeholder="เช่น somsak" aria-describedby="user-username-hint">
+            <p id="user-username-hint" class="text-2xs text-gray-400 mt-1">a–z 0–9 . _ - (3–32 ตัว)</p>
+          </div>
+          <div>
+            <label for="user-display" class="block text-xs font-medium text-gray-600 mb-1">ชื่อที่แสดง</label>
+            <input type="text" id="user-display" maxlength="80" autocomplete="off"
+                   class="w-full px-3 py-2 rounded-lg border text-xs focus:ring-1 focus:ring-blue-500 focus:outline-none"
+                   placeholder="สมศักดิ์ รักชาติ">
+          </div>
+          <div>
+            <label for="user-role" class="block text-xs font-medium text-gray-600 mb-1">บทบาท *</label>
+            <select id="user-role" required class="w-full px-3 py-2 rounded-lg border text-xs focus:ring-1 focus:ring-blue-500 focus:outline-none">
+              <option value="owner">owner — เจ้าของ</option>
+              <option value="admin">admin — ผู้ดูแล</option>
+              <option value="optometrist">optometrist — ทัศนมาตร</option>
+              <option value="staff" selected>staff — พนักงานขาย</option>
+              <option value="viewer">viewer — ดูอย่างเดียว</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div class="sm:col-span-2">
+            <label for="user-password" class="block text-xs font-medium text-gray-600 mb-1">
+              รหัสผ่าน <span id="user-password-label" class="text-gray-400 font-normal">(บัญชีใหม่ต้องตั้ง)</span>
+            </label>
+            <div class="relative">
+              <input type="password" id="user-password" autocomplete="new-password" minlength="8"
+                     class="w-full px-3 pr-10 py-2 rounded-lg border text-xs focus:ring-1 focus:ring-blue-500 focus:outline-none"
+                     placeholder="อย่างน้อย 8 ตัว มีตัวอักษรและตัวเลข" aria-describedby="user-password-hint">
+              <button type="button" data-action="toggle-password" data-target="user-password"
+                      class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
+                      aria-label="แสดงหรือซ่อนรหัสผ่าน" aria-pressed="false">
+                <i class="fa-solid fa-eye text-xs" aria-hidden="true"></i>
+              </button>
+            </div>
+            <p id="user-password-hint" class="text-2xs text-gray-400 mt-1">
+              เว้นว่างไว้ถ้าไม่ต้องการเปลี่ยนรหัสผ่านเดิม · ผู้ใช้จะถูกบังคับให้ตั้งรหัสใหม่เองตอนเข้าระบบครั้งแรก
+            </p>
+          </div>
+          <div class="flex items-end">
+            <button type="button" data-action="suggest-password"
+                    class="w-full px-3 py-2 border border-blue-200 bg-blue-50 text-blue-700 hover:bg-blue-100 rounded-lg text-xs font-semibold transition flex items-center justify-center gap-1.5">
+              <i class="fa-solid fa-dice" aria-hidden="true"></i>
+              สุ่มรหัสผ่าน
+            </button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label for="user-email" class="block text-xs font-medium text-gray-600 mb-1">อีเมล (ไม่บังคับ)</label>
+            <input type="email" id="user-email" autocomplete="off"
+                   class="w-full px-3 py-2 rounded-lg border text-xs focus:ring-1 focus:ring-blue-500 focus:outline-none"
+                   placeholder="staff@example.com">
+          </div>
+          <div>
+            <label for="user-note" class="block text-xs font-medium text-gray-600 mb-1">หมายเหตุ</label>
+            <input type="text" id="user-note" maxlength="120"
+                   class="w-full px-3 py-2 rounded-lg border text-xs focus:ring-1 focus:ring-blue-500 focus:outline-none"
+                   placeholder="เช่น สาขาท่าแพ · พนักงานพาร์ทไทม์">
+          </div>
+        </div>
+
+        <div class="bg-slate-50 border border-slate-200 rounded-lg p-3 text-2xs text-slate-600 leading-relaxed">
+          <strong class="text-slate-800">สิทธิ์แต่ละบทบาท:</strong><br>
+          <strong>owner</strong> ทุกอย่าง รวมถึงจัดการผู้ใช้และโครงสร้างฐานข้อมูล ·
+          <strong>admin</strong> จัดการข้อมูลและบัญชีพนักงาน แต่แตะบัญชี owner ไม่ได้ ·
+          <strong>optometrist</strong> บันทึกผลตรวจและเปิดบิล ·
+          <strong>staff</strong> เปิดบิลและจัดการสต็อก แต่บันทึกผลตรวจไม่ได้ ·
+          <strong>viewer</strong> ดูอย่างเดียว
+        </div>
+
+        <div class="flex justify-end gap-3">
+          <button type="button" data-action="close-modal"
+                  class="px-4 py-2 border rounded-lg text-gray-600 hover:bg-gray-50 text-xs font-semibold">ปิด</button>
+          <button type="submit" class="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg shadow text-xs">บันทึกผู้ใช้</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: ตั้งค่าการเชื่อมต่อฐานข้อมูล -->
+  <!-- z สูงกว่าหน้าจอล็อก (300) เพราะต้องเปิดตั้งค่าจากหน้าล็อกได้ -->
+  <div id="modal-backend" data-modal class="hidden fixed inset-0 z-[350] bg-black/50 overflow-y-auto flex items-start justify-center p-4"
+       role="dialog" aria-modal="true" aria-labelledby="backend-modal-title">
+    <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl relative my-8">
+      <button type="button" data-action="close-modal" aria-label="ปิดหน้าต่าง"
+              class="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
+        <i class="fa-solid fa-xmark text-xl" aria-hidden="true"></i>
+      </button>
+      <h2 class="text-xl font-bold text-gray-900 mb-1" id="backend-modal-title">ตั้งค่าการเชื่อมต่อฐานข้อมูล</h2>
+      <p class="text-xs text-gray-500 mb-4">เลือกว่าจะให้ระบบเก็บข้อมูลไว้ที่ไหน</p>
+
+      <form id="backend-form" class="space-y-4 text-sm" novalidate>
+        <fieldset class="space-y-2">
+          <legend class="text-xs font-semibold text-gray-700 mb-1">โหมดการทำงาน</legend>
+
+          <label class="flex items-start gap-2.5 p-3 border rounded-lg cursor-pointer hover:bg-gray-50">
+            <input type="radio" name="backend-mode" value="local" class="mt-0.5 text-blue-600">
+            <span class="block">
+              <span class="block text-xs font-semibold text-gray-800">เก็บในเครื่องอย่างเดียว (Local)</span>
+              <span class="block text-2xs text-gray-500 leading-relaxed">
+                บันทึกลง localStorage ของเบราว์เซอร์นี้ ใช้งานได้แม้ไม่มีอินเทอร์เน็ต แต่ไม่ซิงค์ข้ามเครื่อง
+              </span>
+            </span>
+          </label>
+
+          <label class="flex items-start gap-2.5 p-3 border rounded-lg cursor-pointer hover:bg-gray-50">
+            <input type="radio" name="backend-mode" value="sheet" class="mt-0.5 text-blue-600">
+            <span class="block">
+              <span class="block text-xs font-semibold text-gray-800">อ่านจาก Google Sheets โดยตรง (อ่านอย่างเดียว)</span>
+              <span class="block text-2xs text-gray-500 leading-relaxed">
+                ดึงข้อมูลผ่าน gviz ไม่ต้องตั้งค่าอะไร แต่<strong>บันทึกกลับขึ้นชีตไม่ได้</strong>
+                และต้องเปิดหน้าเว็บผ่าน http/https
+              </span>
+            </span>
+          </label>
+
+          <label class="flex items-start gap-2.5 p-3 border rounded-lg cursor-pointer hover:bg-gray-50">
+            <input type="radio" name="backend-mode" value="api" class="mt-0.5 text-blue-600">
+            <span class="block">
+              <span class="block text-xs font-semibold text-gray-800">Apps Script API (อ่าน-เขียนสองทาง — แนะนำ)</span>
+              <span class="block text-2xs text-gray-500 leading-relaxed">
+                เชื่อมกับ <span class="font-mono">Code.gs</span> ที่ติดตั้งไว้ในสเปรดชีต
+                บันทึกลูกค้า ผลตรวจ สินค้า และใบสั่งขึ้น Google Sheets ได้จริง พร้อมตัดสต็อกฝั่งเซิร์ฟเวอร์
+              </span>
+            </span>
+          </label>
+        </fieldset>
+
+        <div id="backend-api-fields" class="hidden space-y-3 border-t border-gray-100 pt-3">
+          <div>
+            <label for="backend-url" class="block text-xs font-medium text-gray-600 mb-1">Web App URL *</label>
+            <input type="url" id="backend-url" autocomplete="off" spellcheck="false"
+                   class="w-full px-3 py-2 rounded-lg border font-mono text-2xs focus:ring-1 focus:ring-blue-500 focus:outline-none"
+                   placeholder="https://script.google.com/macros/s/AKfycbx13bzgTATvVjoZh0inCwYfAuM4UBoYVjASi3LPel6kvwQ60l0w3LBlHCkapZK2ayD03A/exec">
+            <p class="text-2xs text-gray-400 mt-1">
+              ได้จาก Apps Script → Deploy → New deployment → Web app (ลงท้ายด้วย <span class="font-mono">/exec</span>)
+            </p>
+          </div>
+          <div class="bg-emerald-50 border border-emerald-200 rounded-lg p-3 text-2xs text-emerald-900 leading-relaxed">
+            <strong class="font-bold">การยืนยันตัวตน:</strong>
+            ระบบไม่ใช้รหัสผ่านหรือ API token ที่ฝังไว้ในหน้าเว็บ ผู้ใช้ล็อกอินด้วยบัญชี Google ของตัวเอง
+            เซิร์ฟเวอร์ตรวจลายเซ็นของ Google แล้วเทียบกับตาราง <strong>Users</strong> เพื่อกำหนดบทบาท
+            ทุกคำสั่งถูกตรวจสิทธิ์ที่ฝั่งเซิร์ฟเวอร์เสมอ
+          </div>
+        </div>
+
+        <div class="flex justify-between items-center gap-3 pt-1">
+          <button type="button" data-action="backend-test" class="text-xs text-blue-600 hover:underline">ทดสอบการเชื่อมต่อ</button>
+          <div class="flex space-x-3">
+            <button type="button" data-action="close-modal"
+                    class="px-4 py-2 border rounded-lg text-gray-600 hover:bg-gray-50 text-xs font-semibold">ยกเลิก</button>
+            <button type="submit" class="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg shadow text-xs">บันทึก</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: รายงานการเชื่อมต่อ Google Sheets -->
+  <div id="modal-sync-report" data-modal class="hidden fixed inset-0 z-[150] bg-black/50 overflow-y-auto flex items-start justify-center p-4"
+       role="dialog" aria-modal="true" aria-labelledby="sync-report-title">
+    <div class="bg-white rounded-2xl max-w-4xl w-full p-6 shadow-2xl relative my-8">
+      <button type="button" data-action="close-modal" aria-label="ปิดหน้าต่าง"
+              class="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
+        <i class="fa-solid fa-xmark text-xl" aria-hidden="true"></i>
+      </button>
+
+      <div class="mb-4 pr-8">
+        <h2 class="text-xl font-bold text-gray-900 flex items-center gap-2" id="sync-report-title">
+          <i class="fa-solid fa-clipboard-check text-blue-600" aria-hidden="true"></i>
+          <span id="sync-report-title-text">รายงานการเชื่อมต่อ Google Sheets</span>
+        </h2>
+        <p id="sync-report-subtitle" class="text-xs text-gray-500 mt-1">
+          ตรวจว่าดึงข้อมูลได้จริง คอลัมน์จับคู่ถูกต้องหรือไม่ และข้อมูลในชีตมีจุดใดต้องแก้ก่อนนำเข้า
+        </p>
+      </div>
+
+      <div id="sync-report-body" class="space-y-4"></div>
+
+      <div class="flex flex-col sm:flex-row justify-end gap-3 pt-4 mt-4 border-t border-gray-100">
+        <button type="button" data-action="close-modal"
+                class="px-4 py-2 border rounded-lg text-gray-600 hover:bg-gray-50 text-sm">ปิด</button>
+        <button type="button" data-action="backend-repair"
+                class="px-4 py-2 bg-amber-100 text-amber-900 hover:bg-amber-200 font-medium rounded-lg text-sm flex items-center justify-center gap-2">
+          <i class="fa-solid fa-screwdriver-wrench" aria-hidden="true"></i>
+          ซ่อมบำรุงฐานข้อมูล
+        </button>
+        <button type="button" data-action="sync-report"
+                class="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg shadow text-sm flex items-center justify-center gap-2">
+          <i class="fa-solid fa-rotate" aria-hidden="true"></i>
+          ตรวจสอบอีกครั้ง
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div id="custom-toast" role="status" aria-live="polite"
+       class="hidden fixed bottom-6 right-6 left-6 sm:left-auto bg-gray-900 text-white text-sm px-6 py-3.5 rounded-xl shadow-2xl z-[450] flex items-center space-x-3 transition-all duration-300">
+    <span id="toast-icon" class="text-emerald-400" aria-hidden="true"><i class="fa-solid fa-circle-check"></i></span>
+    <span id="toast-message">ทำรายการเสร็จสิ้น</span>
+  </div>
+
+</body>
+
+</html>

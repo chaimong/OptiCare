@@ -1076,7 +1076,9 @@
     /** ความยาวรหัสผ่านขั้นต่ำที่เซิร์ฟเวอร์กำหนด (อัปเดตจาก authStatus) */
     minPasswordLength: 8,
     /** โหมดออฟไลน์ถูกล็อกหน้าจออยู่หรือไม่ (ไม่เกี่ยวกับโหมดที่มีบัญชีผู้ใช้) */
-    screenLocked: false
+    screenLocked: false,
+    /** ตัวเลข PIN ที่กรอกค้างอยู่บนแป้น (ไม่เคยถูกบันทึกลงที่ใด) */
+    pinDigits: ''
   };
 
   /** ตรวจสิทธิ์ฝั่งหน้าเว็บเพื่อซ่อนปุ่มเท่านั้น — ด่านจริงอยู่ที่เซิร์ฟเวอร์ */
@@ -1153,6 +1155,12 @@
       loginPassword: $('#login-password'),
       loginSubmit: $('#login-submit'),
       loginChangePassword: $('#login-change-password'),
+      loginPinPanel: $('#login-pin-panel'),
+      pinDots: $('#pin-dots'),
+      pinKeypad: $('#pin-keypad'),
+      pinError: $('#pin-error'),
+      pinTitle: $('#pin-title'),
+      showPinBtn: $('#btn-show-pin'),
       loginOffline: $('#login-offline'),
       changePasswordForm: $('#change-password-form'),
       changePasswordHint: $('#change-password-hint'),
@@ -1170,6 +1178,11 @@
       sessionAvatar: $('#session-avatar'),
       manageUsersBtn: $('#btn-manage-users'),
       changePasswordBtn: $('#btn-change-password'),
+      myPinBtn: $('#btn-my-pin'),
+      pinForm: $('#pin-form'),
+      pinStatus: $('#pin-status'),
+      pinFormError: $('#pin-form-error'),
+      clearPinBtn: $('#btn-clear-pin'),
       usersList: $('#users-list'),
       userForm: $('#user-form'),
 
@@ -1428,11 +1441,12 @@
     }
   }
 
-  /** สลับแผงบนหน้าล็อกอิน: 'checking' | 'formPanel' | 'changePassword' | 'offline' | 'setup' */
+  /** สลับแผงบนหน้าล็อกอิน: 'checking' | 'formPanel' | 'pinPanel' | 'changePassword' | 'offline' | 'setup' */
   function showLoginPanel(name) {
     const panels = {
       checking: els.loginChecking,
       formPanel: els.loginFormPanel,
+      pinPanel: els.loginPinPanel,
       changePassword: els.loginChangePassword,
       offline: els.loginOffline,
       setup: els.loginSetup
@@ -1450,6 +1464,111 @@
   function showChangePasswordError(message) {
     els.changePasswordError.textContent = message;
     els.changePasswordError.classList.toggle('hidden', !message);
+  }
+
+  /* ---------- แป้นกด PIN 6 หลัก ---------- */
+
+  const PIN_LENGTH = 6;
+
+  function showPinError(message) {
+    els.pinError.textContent = message;
+    els.pinError.classList.toggle('hidden', !message);
+  }
+
+  /** วาดจุดบอกจำนวนหลักที่กรอกแล้ว */
+  function renderPinDots() {
+    const filled = state.pinDigits.length;
+    els.pinDots.innerHTML = Array.from({ length: PIN_LENGTH }, (unused, index) =>
+      `<span class="pin-dot${index < filled ? ' is-filled' : ''}"></span>`).join('');
+    els.pinDots.setAttribute('aria-label', `กรอก PIN แล้ว ${filled} จาก ${PIN_LENGTH} หลัก`);
+  }
+
+  function resetPin() {
+    state.pinDigits = '';
+    renderPinDots();
+  }
+
+  /** เปิดแผง PIN พร้อมล้างค่าที่ค้างอยู่ */
+  function showPinLogin() {
+    resetPin();
+    showPinError('');
+    els.pinTitle.textContent = `กรอกรหัส PIN ${PIN_LENGTH} หลัก`;
+    setPinKeypadEnabled(true);
+    showLoginPanel('pinPanel');
+  }
+
+  function setPinKeypadEnabled(enabled) {
+    $$('.pin-key', els.pinKeypad).forEach((button) => { button.disabled = !enabled; });
+  }
+
+  function pushPinDigit(digit) {
+    if (state.pinDigits.length >= PIN_LENGTH) return;
+    state.pinDigits += digit;
+    showPinError('');
+    renderPinDots();
+    // ครบ 6 หลักแล้วส่งเลย ไม่ต้องให้กดปุ่มยืนยันอีกที
+    if (state.pinDigits.length === PIN_LENGTH) submitPinLogin();
+  }
+
+  function popPinDigit() {
+    if (!state.pinDigits.length) return;
+    state.pinDigits = state.pinDigits.slice(0, -1);
+    showPinError('');
+    renderPinDots();
+  }
+
+  /** แจ้งว่า PIN ผิดด้วยการสั่นแป้น แล้วล้างให้กรอกใหม่ */
+  function rejectPin(message) {
+    showPinError(message);
+    els.pinKeypad.classList.add('pin-shake');
+    window.setTimeout(() => els.pinKeypad.classList.remove('pin-shake'), 450);
+    resetPin();
+  }
+
+  async function submitPinLogin() {
+    const pin = state.pinDigits;
+    if (pin.length !== PIN_LENGTH) return;
+
+    setPinKeypadEnabled(false);
+    els.pinTitle.textContent = 'กำลังตรวจสอบ…';
+
+    try {
+      const session = await apiCall('loginPin', { pin, withData: true }, 'POST');
+      resetPin();
+      saveSession(session);
+
+      if (session.mustChangePassword) {
+        // เข้าด้วย PIN แต่ยังไม่เคยตั้งรหัสผ่านเอง — ต้องตั้งก่อน และ PIN ใช้แทนรหัสเดิมไม่ได้
+        showPinError('');
+        promptPasswordChange('');
+        return;
+      }
+
+      setLocked(false);
+      renderSession();
+      showToast(`ยินดีต้อนรับ ${session.user.displayName || session.user.username}`);
+
+      if (session.data && Array.isArray(session.data.customers)) {
+        applyPulledData(session.data);
+        markPullSucceeded();
+      } else {
+        await backendPull({ quiet: true });
+      }
+    } catch (error) {
+      els.pinTitle.textContent = `กรอกรหัส PIN ${PIN_LENGTH} หลัก`;
+      rejectPin(error.message);
+      // ถูกล็อกเพราะกรอกผิดหลายครั้ง — พาไปใช้ชื่อผู้ใช้กับรหัสผ่านแทน
+      if (error.pinLocked) {
+        showLoginPanel('formPanel');
+        showLoginError(error.message);
+        els.loginUsername.focus();
+      }
+    } finally {
+      setPinKeypadEnabled(true);
+      if (els.pinTitle.textContent === 'กำลังตรวจสอบ…') {
+        els.pinTitle.textContent = `กรอกรหัส PIN ${PIN_LENGTH} หลัก`;
+      }
+    }
   }
 
   function saveSession(session) {
@@ -1505,10 +1624,12 @@
     els.manageUsersBtn.classList.toggle('hidden', !can('listUsers'));
     els.manageUsersBtn.classList.toggle('flex', can('listUsers'));
 
-    // ปุ่มเปลี่ยนรหัสผ่านแสดงเฉพาะตอนล็อกอินกับเซิร์ฟเวอร์จริง (โหมดออฟไลน์ไม่มีบัญชี)
-    const canChangePassword = Boolean(user) && state.backend.mode === 'api';
-    els.changePasswordBtn.classList.toggle('hidden', !canChangePassword);
-    els.changePasswordBtn.classList.toggle('flex', canChangePassword);
+    // ปุ่มเปลี่ยนรหัสผ่านและ PIN แสดงเฉพาะตอนล็อกอินกับเซิร์ฟเวอร์จริง (โหมดออฟไลน์ไม่มีบัญชี)
+    const hasAccount = Boolean(user) && state.backend.mode === 'api';
+    els.changePasswordBtn.classList.toggle('hidden', !hasAccount);
+    els.changePasswordBtn.classList.toggle('flex', hasAccount);
+    els.myPinBtn.classList.toggle('hidden', !hasAccount);
+    els.myPinBtn.classList.toggle('flex', hasAccount);
 
     // ซ่อนปุ่มที่บทบาทนี้ใช้ไม่ได้ (เซิร์ฟเวอร์ยังปฏิเสธซ้ำอีกชั้นเสมอ)
     const guarded = [
@@ -1586,9 +1707,23 @@
       els.loginFootnote.textContent =
         'ผู้ดูแลระบบเป็นผู้สร้างบัญชีและกำหนดสิทธิ์ การตรวจสอบสิทธิ์ทั้งหมดทำที่ฝั่งเซิร์ฟเวอร์เสมอ';
       showLoginError('');
-      showLoginPanel('formPanel');
       els.loginPassword.value = '';
-      els.loginUsername.focus();
+
+      // มีคนตั้ง PIN ไว้และยังไม่ถูกล็อก → เปิดแป้น PIN ให้เลย เพราะเร็วกว่าที่หน้าร้าน
+      const pinReady = status.pinEnabled && !status.pinLockedMinutes;
+      els.showPinBtn.classList.toggle('hidden', !status.pinEnabled);
+      els.showPinBtn.classList.toggle('flex', status.pinEnabled);
+
+      if (pinReady) {
+        showPinLogin();
+      } else {
+        showLoginPanel('formPanel');
+        if (status.pinLockedMinutes) {
+          showLoginError(`เข้าสู่ระบบด้วย PIN ถูกระงับชั่วคราวอีก ${status.pinLockedMinutes} นาที `
+            + 'กรุณาใช้ชื่อผู้ใช้และรหัสผ่าน');
+        }
+        els.loginUsername.focus();
+      }
     } catch (error) {
       els.loginSubtitle.textContent = 'เชื่อมต่อเซิร์ฟเวอร์ไม่ได้';
       els.loginSetupTitle.textContent = 'ยังไม่ได้เชื่อมต่อเซิร์ฟเวอร์';
@@ -1693,6 +1828,83 @@
       await backendPull();
     } catch (error) {
       showChangePasswordError(error.message);
+    }
+  }
+
+  /* ---------- PIN ของผู้ใช้ที่ล็อกอินอยู่ ---------- */
+
+  function showPinFormError(message) {
+    els.pinFormError.textContent = message;
+    els.pinFormError.classList.toggle('hidden', !message);
+  }
+
+  function openMyPin() {
+    const hasPin = Boolean(state.session.user && state.session.user.hasPin);
+    els.pinForm.reset();
+    showPinFormError('');
+    els.pinStatus.textContent = hasPin
+      ? 'ตอนนี้คุณตั้ง PIN ไว้แล้ว — บันทึกใหม่เพื่อเปลี่ยน หรือกดยกเลิก PIN เพื่อเลิกใช้'
+      : 'ยังไม่ได้ตั้ง PIN — ตั้งแล้วจะเข้าสู่ระบบด้วยแป้นตัวเลข 6 หลักได้โดยไม่ต้องพิมพ์ชื่อผู้ใช้';
+    els.pinStatus.className = hasPin
+      ? 'text-xs rounded-lg px-3 py-2 bg-emerald-50 border border-emerald-200 text-emerald-800'
+      : 'text-xs rounded-lg px-3 py-2 bg-slate-50 border border-slate-200 text-slate-700';
+    els.clearPinBtn.classList.toggle('hidden', !hasPin);
+    els.clearPinBtn.classList.toggle('flex', hasPin);
+    openModal($('#modal-pin'));
+  }
+
+  async function saveMyPin(event) {
+    event.preventDefault();
+    const password = $('#pin-current-password').value;
+    const pin = $('#pin-new').value.trim();
+
+    if (!password) {
+      showPinFormError('กรุณากรอกรหัสผ่านเพื่อยืนยันตัวตน');
+      return;
+    }
+    if (!/^\d{6}$/.test(pin)) {
+      showPinFormError('PIN ต้องเป็นตัวเลข 6 หลักเท่านั้น');
+      $('#pin-new').focus();
+      return;
+    }
+
+    showPinFormError('');
+    try {
+      await apiCall('setPin', { password, pin }, 'POST');
+      state.session.user = { ...state.session.user, hasPin: true };
+      saveSession({
+        sessionToken: state.session.token,
+        user: state.session.user,
+        permissions: state.session.permissions
+      });
+      closeModal($('#modal-pin'));
+      showToast('ตั้ง PIN เรียบร้อย — ครั้งต่อไปเข้าสู่ระบบด้วยแป้นตัวเลขได้เลย');
+    } catch (error) {
+      showPinFormError(error.message);
+    }
+  }
+
+  async function clearMyPin() {
+    const ok = await askConfirm({
+      title: 'ยกเลิก PIN',
+      message: 'เลิกใช้ PIN เข้าสู่ระบบใช่หรือไม่? ยังเข้าสู่ระบบด้วยชื่อผู้ใช้และรหัสผ่านได้ตามปกติ',
+      confirmLabel: 'ยกเลิก PIN',
+      danger: true
+    });
+    if (!ok) return;
+
+    try {
+      await apiCall('clearPin', {}, 'POST');
+      state.session.user = { ...state.session.user, hasPin: false };
+      saveSession({
+        sessionToken: state.session.token,
+        user: state.session.user,
+        permissions: state.session.permissions
+      });
+      closeModal($('#modal-pin'));
+      showToast('ยกเลิก PIN แล้ว', 'info');
+    } catch (error) {
+      showPinFormError(error.message);
     }
   }
 
@@ -4027,8 +4239,9 @@
     if (!url) throw new Error('ยังไม่ได้ตั้งค่า Web App URL');
 
     // action สาธารณะไม่ต้องมี session token · นอกนั้นต้องล็อกอินก่อน
+    // รายการนี้ต้องตรงกับ PUBLIC_ACTIONS ใน Code.gs เสมอ
     const token = state.session.token || '';
-    if (!token && !['authStatus', 'login'].includes(action)) {
+    if (!token && !['authStatus', 'login', 'loginPin'].includes(action)) {
       throw new Error('ยังไม่ได้เข้าสู่ระบบ');
     }
 
@@ -4611,8 +4824,32 @@
     return pick(letters, 8) + pick(digits, 3);
   }
 
+  /**
+   * สุ่ม PIN 6 หลักที่ผ่านเกณฑ์ฝั่งเซิร์ฟเวอร์
+   * (ไม่ซ้ำทั้งหมด · ไม่เรียงกัน · ไม่เป็นรูปแบบซ้ำอย่าง 121212 หรือ 123123)
+   */
+  function suggestPin() {
+    const weak = (pin) => {
+      if (/^(\d)\1{5}$/.test(pin)) return true;
+      if (/^(\d{2})\1{2}$/.test(pin) || /^(\d{3})\1$/.test(pin)) return true;
+      const digits = pin.split('').map(Number);
+      const up = digits.every((d, i) => i === 0 || d === digits[i - 1] + 1);
+      const down = digits.every((d, i) => i === 0 || d === digits[i - 1] - 1);
+      return up || down;
+    };
+
+    for (let attempt = 0; attempt < 50; attempt++) {
+      const pin = Array.from({ length: 6 }, () => Math.floor(Math.random() * 10)).join('');
+      if (!weak(pin)) return pin;
+    }
+    return '284917';
+  }
+
   function resetUserForm() {
     els.userForm.reset();
+    delete $('#user-pin').dataset.remove;
+    $('#btn-remove-user-pin').classList.add('hidden');
+    $('#btn-remove-user-pin').classList.remove('flex');
     $('#user-id').value = '';
     $('#user-password').type = 'password';
     $('#user-password-label').textContent = '(บัญชีใหม่ต้องตั้ง)';
@@ -4651,7 +4888,10 @@
             ${user.displayName || user.username}
             ${user.username === me ? raw('<span class="text-2xs text-blue-600 font-normal">(คุณ)</span>') : ''}
           </p>
-          <p class="text-2xs text-gray-500 truncate font-mono">${user.username}</p>
+          <p class="text-2xs text-gray-500 truncate font-mono">
+            ${user.username}
+            ${user.hasPin ? raw('<span class="ml-1 text-purple-600" title="ตั้ง PIN ไว้แล้ว"><i class="fa-solid fa-grip"></i></span>') : ''}
+          </p>
           ${user.mustChangePassword
             ? raw(html`<p class="text-2xs text-amber-700">ยังไม่ได้ตั้งรหัสผ่านของตัวเอง</p>`)
             : user.lastLoginAt
@@ -4670,6 +4910,7 @@
                 <button type="button" data-action="edit-user" data-id="${user.id}" data-username="${user.username}"
                         data-display="${user.displayName || ''}" data-role="${user.role}"
                         data-email="${user.email || ''}" data-note="${user.note || ''}"
+                        data-haspin="${user.hasPin ? 'true' : 'false'}"
                         class="p-1.5 text-blue-600 hover:bg-blue-50 rounded" aria-label="แก้ไข ${user.username}">
                   <i class="fa-solid fa-pen text-2xs" aria-hidden="true"></i>
                 </button>
@@ -4688,9 +4929,17 @@
 
     const isNew = !$('#user-id').value;
     const password = $('#user-password').value;
+    const pin = $('#user-pin').value.trim();
+    const removePin = $('#user-pin').dataset.remove === 'true';
+
     if (isNew && !password) {
       showToast('บัญชีใหม่ต้องตั้งรหัสผ่านเริ่มต้น — กดปุ่มสุ่มรหัสผ่านได้', 'error');
       $('#user-password').focus();
+      return;
+    }
+    if (pin && !/^\d{6}$/.test(pin)) {
+      showToast('PIN ต้องเป็นตัวเลข 6 หลักเท่านั้น', 'error');
+      $('#user-pin').focus();
       return;
     }
 
@@ -4705,10 +4954,12 @@
     };
 
     try {
-      await apiCall('saveUser', { record, password }, 'POST');
+      await apiCall('saveUser', { record, password, pin, removePin }, 'POST');
       showToast(password
         ? `บันทึก ${record.username} แล้ว — แจ้งรหัสผ่านให้เจ้าตัว ระบบจะบังคับให้ตั้งรหัสใหม่ตอนเข้าครั้งแรก`
-        : `บันทึกสิทธิ์ของ ${record.username} เรียบร้อย`);
+        : pin
+          ? `บันทึก ${record.username} และตั้ง PIN ให้แล้ว — แจ้ง PIN ให้เจ้าตัว`
+          : `บันทึกสิทธิ์ของ ${record.username} เรียบร้อย`);
       resetUserForm();
       renderUsersList(await apiCall('listUsers'));
     } catch (error) {
@@ -5511,6 +5762,32 @@
     'open-users': () => openUsersModal(),
     'change-password': () => openPasswordChange(),
     'retry-auth': () => initAuth(),
+    'show-pin-login': () => showPinLogin(),
+    'show-password-login': () => {
+      resetPin();
+      showPinError('');
+      showLoginError('');
+      showLoginPanel('formPanel');
+      els.loginUsername.focus();
+    },
+    'pin-key': (el) => pushPinDigit(el.dataset.key),
+    'pin-back': () => popPinDigit(),
+    'pin-clear': () => { resetPin(); showPinError(''); },
+    'open-my-pin': () => openMyPin(),
+    'clear-my-pin': () => clearMyPin(),
+    'suggest-pin': () => {
+      $('#pin-new').value = suggestPin();
+      $('#pin-new').focus();
+    },
+    'suggest-user-pin': () => {
+      $('#user-pin').value = suggestPin();
+      showToast('สุ่ม PIN แล้ว — คัดลอกไปให้เจ้าตัวก่อนกดบันทึก', 'info');
+    },
+    'remove-user-pin': () => {
+      $('#user-pin').value = '';
+      $('#user-pin').dataset.remove = 'true';
+      showToast('จะล้าง PIN ของผู้ใช้รายนี้เมื่อกดบันทึก', 'info');
+    },
     'unlock-offline': () => {
       setScreenLocked(false);
       setLocked(false);
@@ -5544,6 +5821,13 @@
       $('#user-note').value = el.dataset.note || '';
       $('#user-password').value = '';
       $('#user-password-label').textContent = '(เว้นว่าง = ไม่เปลี่ยน)';
+
+      $('#user-pin').value = '';
+      delete $('#user-pin').dataset.remove;
+      const hasPin = el.dataset.haspin === 'true';
+      $('#btn-remove-user-pin').classList.toggle('hidden', !hasPin);
+      $('#btn-remove-user-pin').classList.toggle('flex', hasPin);
+
       $('#user-username').focus();
     },
     'disable-user': (el) => disableUser(el.dataset.id, el.dataset.username),
@@ -5634,6 +5918,24 @@
       });
     });
 
+    // พิมพ์ PIN จากคีย์บอร์ดได้ด้วย สำหรับเครื่องที่ไม่ใช่จอสัมผัส
+    document.addEventListener('keydown', (event) => {
+      if (els.loginPinPanel.classList.contains('hidden')) return;
+      if (event.ctrlKey || event.metaKey || event.altKey) return;
+
+      if (/^[0-9]$/.test(event.key)) {
+        event.preventDefault();
+        pushPinDigit(event.key);
+      } else if (event.key === 'Backspace') {
+        event.preventDefault();
+        popPinDigit();
+      } else if (event.key === 'Escape') {
+        event.preventDefault();
+        resetPin();
+        showPinError('');
+      }
+    });
+
     document.addEventListener('keydown', (event) => {
       if (!modalStack.length) return;
       if (event.key === 'Escape') {
@@ -5647,6 +5949,7 @@
     // ฟอร์มต่าง ๆ
     els.loginForm.addEventListener('submit', submitLogin);
     els.changePasswordForm.addEventListener('submit', submitPasswordChange);
+    els.pinForm.addEventListener('submit', saveMyPin);
     els.userForm.addEventListener('submit', saveUser);
     els.customerForm.addEventListener('submit', saveCustomer);
     els.productForm.addEventListener('submit', saveProduct);

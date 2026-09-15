@@ -155,6 +155,90 @@ body.is-modal-open {
   -webkit-overflow-scrolling: touch;
 }
 
+/* ---------- แป้นกด PIN ----------
+   ปุ่มสูง 56px ตามขนาดเป้าหมายการแตะขั้นต่ำที่แนะนำสำหรับจอสัมผัส
+   และปิด user-select ไม่ให้ตัวเลขถูกไฮไลต์เวลากดรัว ๆ */
+
+.pin-key {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 56px;
+  border-radius: 0.75rem;
+  border: 1px solid #ede9fe;
+  background: #f5f3ff;
+  color: #5b21b6;
+  font-size: 1.25rem;
+  font-weight: 600;
+  line-height: 1;
+  cursor: pointer;
+  transition: background-color 0.12s ease, transform 0.08s ease;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+.pin-key:hover {
+  background: #ede9fe;
+}
+
+.pin-key:active {
+  background: #ddd6fe;
+  transform: scale(0.97);
+}
+
+.pin-key:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.pin-key-clear {
+  background: #fef2f2;
+  border-color: #fee2e2;
+  color: #dc2626;
+}
+
+.pin-key-clear:hover { background: #fee2e2; }
+.pin-key-clear:active { background: #fecaca; }
+
+.pin-key-back {
+  background: #fffbeb;
+  border-color: #fef3c7;
+  color: #b45309;
+}
+
+.pin-key-back:hover { background: #fef3c7; }
+.pin-key-back:active { background: #fde68a; }
+
+/* จุดแสดงจำนวนหลักที่กรอกแล้ว */
+.pin-dot {
+  width: 0.875rem;
+  height: 0.875rem;
+  border-radius: 9999px;
+  background: #ede9fe;
+  transition: background-color 0.15s ease, transform 0.15s ease;
+}
+
+.pin-dot.is-filled {
+  background: #7c3aed;
+  transform: scale(1.12);
+}
+
+/* สั่นเมื่อ PIN ผิด ให้รู้ทันทีโดยไม่ต้องอ่านข้อความ */
+@keyframes pin-shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-7px); }
+  40% { transform: translateX(7px); }
+  60% { transform: translateX(-4px); }
+  80% { transform: translateX(4px); }
+}
+
+.pin-shake {
+  animation: pin-shake 0.4s ease;
+}
+
 /* ---------- Preferences ---------- */
 
 @media (prefers-reduced-motion: reduce) {

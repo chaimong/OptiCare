@@ -116,7 +116,51 @@
           </button>
 
           <p id="login-error" role="alert" class="hidden text-rose-600 text-xs font-medium bg-rose-50 border border-rose-200 rounded-lg p-3 leading-relaxed"></p>
+
+          <button type="button" data-action="show-pin-login" id="btn-show-pin"
+                  class="hidden w-full text-xs font-semibold text-blue-700 hover:text-blue-900 hover:bg-blue-50 py-2 rounded-lg transition items-center justify-center gap-1.5">
+            <i class="fa-solid fa-grip" aria-hidden="true"></i>
+            <span>เข้าสู่ระบบด้วย PIN 6 หลัก</span>
+          </button>
         </form>
+      </div>
+
+      <!-- เข้าสู่ระบบด้วย PIN 6 หลัก (แป้นกดสำหรับจอสัมผัสหน้าร้าน) -->
+      <div id="login-pin-panel" class="hidden">
+        <div class="space-y-4">
+          <div class="text-center">
+            <p id="pin-title" class="text-sm font-semibold text-gray-700">กรอกรหัส PIN 6 หลัก</p>
+            <div id="pin-dots" class="flex justify-center gap-2.5 mt-3" role="status"
+                 aria-live="polite" aria-label="กรอก PIN แล้ว 0 จาก 6 หลัก"></div>
+          </div>
+
+          <div id="pin-keypad" class="grid grid-cols-3 gap-2.5">
+            <button type="button" data-action="pin-key" data-key="1" class="pin-key">1</button>
+            <button type="button" data-action="pin-key" data-key="2" class="pin-key">2</button>
+            <button type="button" data-action="pin-key" data-key="3" class="pin-key">3</button>
+            <button type="button" data-action="pin-key" data-key="4" class="pin-key">4</button>
+            <button type="button" data-action="pin-key" data-key="5" class="pin-key">5</button>
+            <button type="button" data-action="pin-key" data-key="6" class="pin-key">6</button>
+            <button type="button" data-action="pin-key" data-key="7" class="pin-key">7</button>
+            <button type="button" data-action="pin-key" data-key="8" class="pin-key">8</button>
+            <button type="button" data-action="pin-key" data-key="9" class="pin-key">9</button>
+            <button type="button" data-action="pin-clear" class="pin-key pin-key-clear" aria-label="ล้าง PIN ที่กรอกไว้">
+              <i class="fa-solid fa-rotate-left" aria-hidden="true"></i>
+            </button>
+            <button type="button" data-action="pin-key" data-key="0" class="pin-key">0</button>
+            <button type="button" data-action="pin-back" class="pin-key pin-key-back" aria-label="ลบหลักสุดท้าย">
+              <i class="fa-solid fa-delete-left" aria-hidden="true"></i>
+            </button>
+          </div>
+
+          <p id="pin-error" role="alert" class="hidden text-rose-600 text-xs font-medium bg-rose-50 border border-rose-200 rounded-lg p-3 leading-relaxed"></p>
+
+          <button type="button" data-action="show-password-login"
+                  class="w-full text-xs font-semibold text-gray-500 hover:text-gray-800 hover:bg-gray-50 py-2 rounded-lg transition flex items-center justify-center gap-1.5">
+            <i class="fa-solid fa-keyboard" aria-hidden="true"></i>
+            <span>ใช้ชื่อผู้ใช้และรหัสผ่านแทน</span>
+          </button>
+        </div>
       </div>
 
       <!-- บังคับตั้งรหัสผ่านใหม่ (บัญชีใหม่ หรือถูกผู้ดูแลรีเซ็ตรหัส) -->
@@ -271,6 +315,12 @@
             <div id="session-avatar" class="h-10 w-10 flex-shrink-0 rounded-full bg-sky-500 flex items-center justify-center text-white font-bold overflow-hidden" aria-hidden="true">
               <i class="fa-solid fa-user"></i>
             </div>
+            <button type="button" data-action="open-my-pin" id="btn-my-pin"
+                    class="hidden flex-shrink-0 bg-blue-800 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold shadow-md transition items-center gap-1.5">
+              <i class="fa-solid fa-grip" aria-hidden="true"></i>
+              <span class="hidden xl:inline">PIN ของฉัน</span>
+              <span class="sr-only xl:hidden">PIN ของฉัน</span>
+            </button>
             <button type="button" data-action="change-password" id="btn-change-password"
                     class="hidden flex-shrink-0 bg-blue-800 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold shadow-md transition items-center gap-1.5">
               <i class="fa-solid fa-key" aria-hidden="true"></i>
@@ -1852,6 +1902,33 @@
           </div>
         </div>
 
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div class="sm:col-span-2">
+            <label for="user-pin" class="block text-xs font-medium text-gray-600 mb-1">
+              PIN 6 หลัก <span class="text-gray-400 font-normal">(ไม่บังคับ — ใช้เข้าสู่ระบบเร็วที่หน้าร้าน)</span>
+            </label>
+            <input type="text" id="user-pin" inputmode="numeric" pattern="\d{6}" maxlength="6"
+                   autocomplete="off" spellcheck="false"
+                   class="w-full px-3 py-2 rounded-lg border text-xs text-center tracking-[0.3em] font-mono focus:ring-1 focus:ring-blue-500 focus:outline-none"
+                   placeholder="เว้นว่าง = ไม่เปลี่ยน" aria-describedby="user-pin-hint">
+            <p id="user-pin-hint" class="text-2xs text-gray-400 mt-1">
+              PIN ต้องไม่ซ้ำกับของพนักงานคนอื่น · ห้ามเลขซ้ำ เลขเรียง หรือรูปแบบซ้ำ
+            </p>
+          </div>
+          <div class="flex items-start gap-2 pt-5">
+            <button type="button" data-action="suggest-user-pin"
+                    class="flex-1 px-2 py-2 border border-blue-200 bg-blue-50 text-blue-700 hover:bg-blue-100 rounded-lg text-xs font-semibold transition flex items-center justify-center gap-1">
+              <i class="fa-solid fa-dice" aria-hidden="true"></i>
+              สุ่ม
+            </button>
+            <button type="button" data-action="remove-user-pin" id="btn-remove-user-pin"
+                    class="hidden flex-1 px-2 py-2 border border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100 rounded-lg text-xs font-semibold transition items-center justify-center gap-1">
+              <i class="fa-solid fa-ban" aria-hidden="true"></i>
+              ล้าง
+            </button>
+          </div>
+        </div>
+
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
             <label for="user-email" class="block text-xs font-medium text-gray-600 mb-1">อีเมล (ไม่บังคับ)</label>
@@ -1880,6 +1957,67 @@
           <button type="button" data-action="close-modal"
                   class="px-4 py-2 border rounded-lg text-gray-600 hover:bg-gray-50 text-xs font-semibold">ปิด</button>
           <button type="submit" class="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg shadow text-xs">บันทึกผู้ใช้</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: PIN ของฉัน -->
+  <div id="modal-pin" data-modal class="hidden fixed inset-0 z-[150] bg-black/50 flex items-center justify-center p-2 sm:p-4"
+       role="dialog" aria-modal="true" aria-labelledby="pin-modal-title">
+    <div class="modal-panel bg-white rounded-2xl max-w-sm w-full shadow-2xl relative">
+      <div class="modal-head">
+        <h2 class="text-lg font-bold text-gray-900 pr-10" id="pin-modal-title">PIN ของฉัน</h2>
+        <p class="text-2xs text-gray-500 mt-0.5">ใช้เข้าสู่ระบบเร็วที่หน้าร้านโดยไม่ต้องพิมพ์ชื่อผู้ใช้</p>
+        <button type="button" data-action="close-modal" aria-label="ปิดหน้าต่าง"
+                class="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
+          <i class="fa-solid fa-xmark text-xl" aria-hidden="true"></i>
+        </button>
+      </div>
+
+      <form id="pin-form" class="modal-form text-sm" novalidate>
+        <div class="modal-body space-y-3">
+          <p id="pin-status" class="text-xs rounded-lg px-3 py-2 bg-slate-50 border border-slate-200 text-slate-700"></p>
+
+          <div>
+            <label for="pin-current-password" class="block text-xs font-semibold text-gray-700 mb-1">
+              ยืนยันด้วยรหัสผ่านของคุณ *
+            </label>
+            <input type="password" id="pin-current-password" required autocomplete="current-password"
+                   class="w-full px-3 py-2.5 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none">
+            <p class="text-2xs text-gray-400 mt-1">ป้องกันไม่ให้คนที่หยิบเครื่องที่เปิดค้างไว้ตั้ง PIN ทับของคุณ</p>
+          </div>
+
+          <div>
+            <label for="pin-new" class="block text-xs font-semibold text-gray-700 mb-1">PIN ใหม่ (6 หลัก) *</label>
+            <div class="flex gap-2">
+              <input type="text" id="pin-new" required inputmode="numeric" pattern="\d{6}" maxlength="6"
+                     autocomplete="off" spellcheck="false"
+                     class="flex-1 px-3 py-2.5 rounded-xl border border-gray-300 text-center text-lg tracking-[0.4em] font-mono focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none"
+                     placeholder="000000" aria-describedby="pin-new-hint">
+              <button type="button" data-action="suggest-pin"
+                      class="px-3 py-2 border border-blue-200 bg-blue-50 text-blue-700 hover:bg-blue-100 rounded-xl text-xs font-semibold transition flex items-center gap-1.5 whitespace-nowrap">
+                <i class="fa-solid fa-dice" aria-hidden="true"></i>
+                สุ่ม
+              </button>
+            </div>
+            <p id="pin-new-hint" class="text-2xs text-gray-400 mt-1">
+              ห้ามใช้เลขซ้ำทั้งหมด เลขเรียง หรือรูปแบบซ้ำ เช่น 111111 · 123456 · 121212
+            </p>
+          </div>
+
+          <p id="pin-form-error" role="alert" class="hidden text-rose-600 text-xs font-medium bg-rose-50 border border-rose-200 rounded-lg p-3 leading-relaxed"></p>
+        </div>
+
+        <div class="modal-foot flex flex-wrap justify-end gap-3">
+          <button type="button" data-action="clear-my-pin" id="btn-clear-pin"
+                  class="hidden mr-auto px-4 py-2 border border-rose-200 text-rose-600 hover:bg-rose-50 rounded-lg font-semibold text-xs transition items-center gap-1.5">
+            <i class="fa-solid fa-trash-can" aria-hidden="true"></i>
+            <span>ยกเลิก PIN</span>
+          </button>
+          <button type="button" data-action="close-modal"
+                  class="px-4 py-2 border rounded-lg text-gray-600 hover:bg-gray-50 text-xs font-semibold">ปิด</button>
+          <button type="submit" class="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg shadow text-xs">บันทึก PIN</button>
         </div>
       </form>
     </div>
